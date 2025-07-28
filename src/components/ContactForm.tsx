@@ -1,7 +1,92 @@
+/**
+ * ===============================================
+ * CREATIVE HUT WEBSITE - PROPIEDAD INTELECTUAL
+ * ===============================================
+ * 
+ * Desarrollado por: Ing. José Ríler Solórzano Campos
+ * Empresa: DEVIT506
+ * Website: www.devit506.net
+ * Fecha: 28 de julio de 2025
+ * 
+ * © 2025 José Ríler Solórzano Campos - DEVIT506
+ * Todos los derechos reservados.
+ * 
+ * Este código es propiedad intelectual exclusiva del 
+ * desarrollador y no puede ser reproducido, distribuido
+ * o modificado sin autorización expresa por escrito.
+ * ===============================================
+ */
+
+/**
+ * @fileoverview Componente de formulario de contacto profesional y reutilizable
+ * @description Implementa un formulario completo de contacto con validación,
+ * integración con API de email, manejo de estados y UX optimizada.
+ * 
+ * @module ContactForm
+ * @version 1.0.0
+ * @author José Ríler Solórzano Campos <web@creativehutcr.com>
+ * @company DEVIT506 - www.devit506.net
+ * @since 2025-07-28
+ * 
+ * @requires react - Hooks useState, useRef para manejo de estado
+ * @requires /api/send-email - Endpoint personalizado para envío de emails
+ * 
+ * @usage
+ * import ContactForm from '@/components/ContactForm';
+ * <ContactForm />
+ * 
+ * @dependencies
+ * - API Route: /src/app/api/send-email/route.ts
+ * - Usado en: Páginas de servicios, página principal
+ * - Estilos: Tailwind CSS v4 (clases utility)
+ * 
+ * @features
+ * - Validación en tiempo real
+ * - Mensajes de éxito/error
+ * - Loading states
+ * - Botón WhatsApp integrado
+ * - Formulario responsivo
+ * - Consentimiento de datos
+ */
+
+// ============================================================================
+// DIRECTIVA CLIENT - Indica que es un Client Component
+// ============================================================================
+
+/**
+ * 'use client' - Directiva de Next.js 13+ App Router
+ * - Marca este archivo como Client Component
+ * - Permite uso de hooks de React (useState, useRef, useEffect)
+ * - Se ejecuta en el navegador, no en el servidor
+ * - Necesario para interactividad y manejo de estado
+ */
 'use client';
 
+// ============================================================================
+// IMPORTS - Dependencias de React y tipos
+// ============================================================================
+
+/**
+ * Hooks de React importados desde 'react'
+ * - useState: Para manejo de estado del formulario y UI
+ * - useRef: Para referencias directas a elementos DOM
+ */
 import { useState, useRef } from 'react';
 
+// ============================================================================
+// INTERFACES - Definición de tipos TypeScript
+// ============================================================================
+
+/**
+ * @interface FormData
+ * @description Estructura de datos del formulario de contacto
+ * @property {string} fullName - Nombre completo del usuario (requerido)
+ * @property {string} email - Email del usuario (requerido, con validación)
+ * @property {string} phone - Teléfono del usuario (opcional)
+ * @property {string} service - Servicio de interés seleccionado (opcional)
+ * @property {string} message - Mensaje del usuario (requerido)
+ * @property {boolean} consent - Consentimiento para contacto comercial (requerido)
+ */
 interface FormData {
   fullName: string;
   email: string;
