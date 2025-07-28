@@ -1,0 +1,560 @@
+@import "tailwindcss";
+
+/* Clases personalizadas para Tailwind */
+.border-3 {
+  border-width: 3px;
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Animaciones personalizadas para la sección Hero */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  33% {
+    transform: translateY(-20px) rotate(1deg);
+  }
+  66% {
+    transform: translateY(10px) rotate(-1deg);
+  }
+}
+
+@keyframes float-delayed {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  33% {
+    transform: translateY(15px) rotate(-1deg);
+  }
+  66% {
+    transform: translateY(-10px) rotate(1deg);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: float-delayed 8s ease-in-out infinite;
+  animation-delay: 2s;
+}
+
+/* Optimizaciones para animaciones suaves */
+.transform-gpu {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* Mejoras para efectos hover */
+button.transform-gpu {
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Animación sutil para elementos que aparecen */
+.fade-in-up {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.fade-in-up.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Optimizaciones para scroll suave con Lenis */
+html {
+  scroll-behavior: auto !important;
+}
+
+html.lenis {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+/* Mejoras de rendimiento para scroll */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(155, 155, 155, 0.5) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: rgba(155, 155, 155, 0.5);
+  border-radius: 20px;
+  border: transparent;
+}
+
+/* Estilos para Swiper - Slider de clientes */
+.clients-swiper {
+  overflow: hidden;
+  margin: 0 -20px;
+  padding: 20px;
+}
+
+.clients-swiper .swiper-wrapper {
+  transition-timing-function: linear;
+}
+
+.clients-swiper .swiper-slide {
+  height: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Animaciones adicionales */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounce {
+  0%, 20%, 53%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40%, 43% {
+    transform: translateY(-30px);
+  }
+  70% {
+    transform: translateY(-15px);
+  }
+  90% {
+    transform: translateY(-4px);
+  }
+}
+
+/* Efectos hover para el footer */
+.footer-contact-item {
+  transition: all 0.3s ease;
+}
+
+.footer-contact-item:hover {
+  transform: translateX(5px);
+}
+
+/* Animación sutil para iconos de redes sociales */
+.social-icon {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.social-icon::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s;
+}
+
+.social-icon:hover::before {
+  left: 100%;
+}
+
+/* Efectos mejorados para Hero */
+.hero-button-primary {
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 0 rgba(14, 165, 233, 0);
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hero-button-primary:hover {
+  box-shadow: 0 0 40px rgba(14, 165, 233, 0.6), 0 0 80px rgba(14, 165, 233, 0.3);
+  transform: translateY(-2px);
+}
+
+.hero-button-secondary {
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 0 rgba(139, 92, 246, 0);
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hero-button-secondary:hover {
+  box-shadow: 0 0 40px rgba(139, 92, 246, 0.6), 0 0 80px rgba(139, 92, 246, 0.3);
+  transform: translateY(-2px);
+}
+
+/* Efecto de resplandor para títulos */
+.hero-title {
+  text-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+}
+
+/* Animaciones de fondo mejoradas */
+@keyframes float-enhanced {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg) scale(1);
+  }
+  33% {
+    transform: translateY(-25px) rotate(2deg) scale(1.05);
+  }
+  66% {
+    transform: translateY(15px) rotate(-2deg) scale(0.95);
+  }
+}
+
+@keyframes float-delayed-enhanced {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg) scale(1);
+  }
+  33% {
+    transform: translateY(20px) rotate(-1.5deg) scale(1.1);
+  }
+  66% {
+    transform: translateY(-15px) rotate(1.5deg) scale(0.9);
+  }
+}
+
+.animate-float {
+  animation: float-enhanced 8s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: float-delayed-enhanced 10s ease-in-out infinite;
+  animation-delay: 3s;
+}
+
+/* Gradiente animado para el texto principal del footer */
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animated-gradient-text {
+  background-size: 200% 200%;
+  animation: gradient-shift 4s ease infinite;
+}
+
+/* Animaciones específicas para la sección ADN */
+@keyframes float-enhanced {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg) scale(1);
+    opacity: 0.6;
+  }
+  25% {
+    transform: translateY(-25px) rotate(2deg) scale(1.1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translateY(-35px) rotate(-1deg) scale(1.05);
+    opacity: 1;
+  }
+  75% {
+    transform: translateY(-15px) rotate(1.5deg) scale(0.95);
+    opacity: 0.7;
+  }
+}
+
+.animate-float-enhanced {
+  animation: float-enhanced 12s ease-in-out infinite;
+}
+
+/* Efectos de glassmorphism para las cards del ADN */
+.adn-card-glass {
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.85);
+}
+
+/* Efectos de hover mejorados para sección ADN */
+.adn-card-hover {
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.adn-card-hover:hover {
+  transform: translateY(-12px) scale(1.05);
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(255, 255, 255, 0.3);
+}
+
+/* Gradientes de texto para títulos de ADN */
+.adn-title-gradient {
+  background: linear-gradient(135deg, #10b981, #3b82f6, #8b5cf6);
+  background-size: 300% 300%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradient-flow 6s ease-in-out infinite;
+}
+
+@keyframes gradient-flow {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Animaciones adicionales para fondo colorido y alegre */
+@keyframes colorful-float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg) scale(1);
+    filter: hue-rotate(0deg);
+  }
+  25% {
+    transform: translateY(-30px) rotate(5deg) scale(1.1);
+    filter: hue-rotate(90deg);
+  }
+  50% {
+    transform: translateY(-40px) rotate(-3deg) scale(1.05);
+    filter: hue-rotate(180deg);
+  }
+  75% {
+    transform: translateY(-20px) rotate(2deg) scale(0.95);
+    filter: hue-rotate(270deg);
+  }
+}
+
+@keyframes rainbow-pulse {
+  0%, 100% {
+    filter: hue-rotate(0deg) brightness(1);
+  }
+  25% {
+    filter: hue-rotate(90deg) brightness(1.2);
+  }
+  50% {
+    filter: hue-rotate(180deg) brightness(1.1);
+  }
+  75% {
+    filter: hue-rotate(270deg) brightness(1.3);
+  }
+}
+
+@keyframes festive-bounce {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+    filter: saturate(1);
+  }
+  50% {
+    transform: translateY(-20px) scale(1.1);
+    filter: saturate(1.5);
+  }
+}
+
+.animate-colorful-float {
+  animation: colorful-float 15s ease-in-out infinite;
+}
+
+.animate-rainbow-pulse {
+  animation: rainbow-pulse 8s ease-in-out infinite;
+}
+
+.animate-festive-bounce {
+  animation: festive-bounce 4s ease-in-out infinite;
+}
+
+/* Animaciones específicas para la sección Hero con colores de marca */
+@keyframes hero-float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg) scale(1);
+    filter: brightness(1) saturate(1);
+  }
+  25% {
+    transform: translateY(-35px) rotate(3deg) scale(1.05);
+    filter: brightness(1.2) saturate(1.1);
+  }
+  50% {
+    transform: translateY(-45px) rotate(-2deg) scale(1.1);
+    filter: brightness(1.1) saturate(1.3);
+  }
+  75% {
+    transform: translateY(-25px) rotate(1deg) scale(0.95);
+    filter: brightness(1.3) saturate(1.2);
+  }
+}
+
+@keyframes hero-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+    filter: brightness(1);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(139, 92, 246, 0.6), 0 0 80px rgba(6, 182, 212, 0.3);
+    filter: brightness(1.2);
+  }
+}
+
+@keyframes agency-pulse {
+  0%, 100% {
+    filter: hue-rotate(0deg) brightness(1) saturate(1);
+  }
+  33% {
+    filter: hue-rotate(15deg) brightness(1.1) saturate(1.2);
+  }
+  66% {
+    filter: hue-rotate(-15deg) brightness(1.05) saturate(1.1);
+  }
+}
+
+.animate-hero-float {
+  animation: hero-float 12s ease-in-out infinite;
+}
+
+.animate-hero-glow {
+  animation: hero-glow 6s ease-in-out infinite;
+}
+
+.animate-agency-pulse {
+  animation: agency-pulse 8s ease-in-out infinite;
+}
+
+/* Mejoras para botones del Hero */
+.hero-button-dynamic {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hero-button-dynamic:hover {
+  animation: hero-glow 2s ease-in-out infinite;
+  transform: translateY(-3px) scale(1.05);
+}
+
+/* Animaciones específicas para Hero - Patrón tecnológico único */
+@keyframes neural-pulse {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.1);
+  }
+}
+
+@keyframes data-flow {
+  0% {
+    stroke-dasharray: 0, 100;
+    opacity: 0.3;
+  }
+  50% {
+    stroke-dasharray: 50, 50;
+    opacity: 0.8;
+  }
+  100% {
+    stroke-dasharray: 100, 0;
+    opacity: 0.3;
+  }
+}
+
+@keyframes tech-grid-glow {
+  0%, 100% {
+    opacity: 0.2;
+    filter: brightness(1);
+  }
+  50% {
+    opacity: 0.5;
+    filter: brightness(1.3);
+  }
+}
+
+@keyframes code-particle-float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg) scale(1);
+    filter: brightness(1);
+  }
+  25% {
+    transform: translateY(-20px) rotate(5deg) scale(1.05);
+    filter: brightness(1.2);
+  }
+  50% {
+    transform: translateY(-30px) rotate(-3deg) scale(1.1);
+    filter: brightness(1.1);
+  }
+  75% {
+    transform: translateY(-15px) rotate(2deg) scale(0.95);
+    filter: brightness(1.3);
+  }
+}
+
+@keyframes interface-blink {
+  0%, 90%, 100% {
+    opacity: 0.6;
+  }
+  45% {
+    opacity: 1;
+  }
+}
+
+.animate-neural-pulse {
+  animation: neural-pulse 4s ease-in-out infinite;
+}
+
+.animate-data-flow {
+  animation: data-flow 6s linear infinite;
+}
+
+.animate-tech-grid-glow {
+  animation: tech-grid-glow 8s ease-in-out infinite;
+}
+
+.animate-code-particle-float {
+  animation: code-particle-float 10s ease-in-out infinite;
+}
+
+.animate-interface-blink {
+  animation: interface-blink 3s ease-in-out infinite;
+}
+
+/* Efectos específicos para elementos tecnológicos */
+.tech-element {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tech-element:hover {
+  filter: brightness(1.4) saturate(1.2);
+  transform: scale(1.1);
+}

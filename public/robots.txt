@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+
+# Specifically allow our service pages
+Allow: /servicios/
+Allow: /servicios/publicidad-digital
+Allow: /servicios/marketing-digital
+Allow: /servicios/produccion-digital
+Allow: /servicios/eventos
+Allow: /servicios/desarrollo
+
+Sitemap: https://creativehutcr.com/sitemap.xml
