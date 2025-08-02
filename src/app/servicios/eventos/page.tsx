@@ -48,12 +48,87 @@ export default function EventosPage() {
     }
   }, []);
 
+  // Schema.org para el servicio de eventos corporativos
+  const eventsSchema = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "name": "Eventos Corporativos",
+    "description": "Producción integral de eventos corporativos, institucionales y comerciales en Costa Rica. Conectamos, inspiramos y dejamos huella en cada evento.",
+    "provider": {
+      "@type": "Organization",
+      "name": "Creative Hut",
+      "url": "https://creativehutcr.com"
+    },
+    "areaServed": {
+      "@type": "Country", 
+      "name": "Costa Rica"
+    },
+    "serviceType": "Event Planning",
+    "category": "Event Services",
+    "offers": {
+      "@type": "Offer",
+      "description": "Organización y producción de eventos corporativos, lanzamientos de productos, conferencias y activaciones de marca",
+      "seller": {
+        "@type": "Organization",
+        "name": "Creative Hut"
+      }
+    },
+    "hasOfferCatalog": {
+      "@type": "OfferCatalog",
+      "name": "Servicios de Eventos",
+      "itemListElement": [
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Lanzamientos de Producto", 
+            "description": "Eventos memorables que posicionan tu producto desde el primer día"
+          }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Conferencias y Seminarios",
+            "description": "Eventos educativos y profesionales que inspiran y conectan"
+          }
+        },
+        {
+          "@type": "Offer", 
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Activaciones de Marca",
+            "description": "Experiencias inmersivas que conectan emocionalmente con tu audiencia"
+          }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Celebraciones Corporativas",
+            "description": "Eventos que fortalecen la cultura empresarial y celebran logros"
+          }
+        }
+      ]
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gray-900">
-      <Navigation />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(eventsSchema),
+        }}
+      />
+      <div className="min-h-screen bg-gray-900">
+      <header>
+        <Navigation />
+      </header>
       
-      {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center px-6 py-20 overflow-hidden">
+      <main>
+        {/* Hero Section */}
+        <section className="relative min-h-screen flex items-center justify-center px-6 py-20 overflow-hidden">
         {/* Background Elements */}
         <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-black"></div>
         <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/10 via-orange-500/15 to-red-600/10"></div>
@@ -245,9 +320,11 @@ export default function EventosPage() {
           </div>
         </div>
       </section>
+      </main>
 
       {/* Contact Section */}
       <ContactForm />
-    </div>
+      </div>
+    </>
   );
 }

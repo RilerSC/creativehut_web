@@ -21,6 +21,7 @@
 
 import { useEffect, useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import Navigation from '@/components/Navigation';
 import ContactForm from '@/components/ContactForm';
 import { useAnimations } from '@/hooks/useAnimations';
@@ -54,9 +55,6 @@ export default function Home() {
   const clientsTitleRef = useRef<HTMLHeadingElement>(null);
   const clientsLineRef = useRef<HTMLDivElement>(null);
   const clientsSwiperRef = useRef<HTMLDivElement>(null);
-  
-  // Referencias para elementos creativos del fondo ADN
-  const creativeBgRef = useRef<SVGSVGElement>(null);
   
   const { animateIn, gsap } = useAnimations();
 
@@ -452,69 +450,56 @@ export default function Home() {
 
     // Configurar animaciones para elementos creativos del fondo ADN
     const setupCreativeBackgroundAnimations = () => {
-      if (creativeBgRef.current) {
-        const bulbs = creativeBgRef.current.querySelectorAll('.creative-bulb');
-        const clouds = creativeBgRef.current.querySelectorAll('.creative-cloud');
-        const gears = creativeBgRef.current.querySelectorAll('.creative-gear');
-        
-        // Animación flotante para bombillas
-        bulbs.forEach((bulb, index) => {
-          gsap.to(bulb, {
-            y: "+=20",
-            rotation: "+=5",
-            duration: 2.96 + index * 0.37, // (4 + index * 0.5) / 1.35 = 35% más rápido
-            ease: "power1.inOut",
-            repeat: -1,
-            yoyo: true,
-            delay: index * 0.52 // 0.7 / 1.35 = 0.52 (35% más rápido)
-          });
-          
-          // Pulso sutil en la opacidad
-          gsap.to(bulb, {
-            opacity: 0.3,
-            duration: 1.48 + index * 0.22, // (2 + index * 0.3) / 1.35 = 35% más rápido
-            ease: "power2.inOut",
-            repeat: -1,
-            yoyo: true,
-            delay: index * 0.30 // 0.4 / 1.35 = 0.30 (35% más rápido)
-          });
+      // Seleccionar todos los isotipos flotantes
+      const isotopes = document.querySelectorAll('.creative-isotope');
+      
+      // Animación flotante para todos los isotipos
+      isotopes.forEach((isotope, index) => {
+        // Movimiento flotante más amplio y rápido (25% más velocidad)
+        gsap.to(isotope, {
+          y: "+=25", // Aumentado de 15 a 25 (más trayectoria)
+          x: "+=20", // Aumentado de 10 a 20 (más trayectoria horizontal)
+          rotation: "+=8", // Aumentado de 3 a 8 (más rotación)
+          duration: (3.5 + index * 0.5) * 0.75, // 25% más rápido (multiplica por 0.75)
+          ease: "power1.inOut",
+          repeat: -1,
+          yoyo: true,
+          delay: (index * 0.3) * 0.75 // 25% más rápido en delays también
         });
         
-        // Animación flotante para nubes
-        clouds.forEach((cloud, index) => {
-          gsap.to(cloud, {
-            x: "+=30",
-            y: "+=15",
-            duration: 4.44 + index * 0.59, // (6 + index * 0.8) / 1.35 = 35% más rápido
-            ease: "power1.inOut",
-            repeat: -1,
-            yoyo: true,
-            delay: index * 0.67 // 0.9 / 1.35 = 0.67 (35% más rápido)
-          });
+        // Pulso sutil en la opacidad para crear efecto "respiración" más rápido
+        gsap.to(isotope, {
+          opacity: (isotope as HTMLElement).style.opacity ? parseFloat((isotope as HTMLElement).style.opacity) * 0.7 : 0.15,
+          duration: (2.5 + index * 0.4) * 0.75, // 25% más rápido
+          ease: "power2.inOut",
+          repeat: -1,
+          yoyo: true,
+          delay: (index * 0.2) * 0.75 // 25% más rápido
         });
         
-        // Animación de rotación para engranajes
-        gears.forEach((gear, index) => {
-          gsap.to(gear, {
-            rotation: "+=360",
-            duration: 5.93 + index * 1.48, // (8 + index * 2) / 1.35 = 35% más rápido
-            ease: "none",
-            repeat: -1,
-            delay: index * 0.89 // 1.2 / 1.35 = 0.89 (35% más rápido)
-          });
-          
-          // Movimiento sutil
-          gsap.to(gear, {
-            x: "+=10",
-            y: "+=10",
-            duration: 3.70 + index * 0.44, // (5 + index * 0.6) / 1.35 = 35% más rápido
-            ease: "power1.inOut",
-            repeat: -1,
-            yoyo: true,
-            delay: index * 0.59 // 0.8 / 1.35 = 0.59 (35% más rápido)
-          });
+        // Escala más pronunciada y rápida para dar más vida
+        gsap.to(isotope, {
+          scale: 1.08, // Aumentado de 1.05 a 1.08 (más escala)
+          duration: (4 + index * 0.3) * 0.75, // 25% más rápido
+          ease: "power1.inOut", 
+          repeat: -1,
+          yoyo: true,
+          delay: (index * 0.4) * 0.75 // 25% más rápido
         });
-      }
+        
+        // Movimiento circular adicional para más dinamismo
+        gsap.to(isotope, {
+          motionPath: {
+            path: `M0,0 Q${15 + index * 3},${-10 - index * 2} ${30 + index * 5},0 T${60 + index * 8},0`, // Trayectoria curva más amplia
+            autoRotate: false,
+          },
+          duration: (6 + index * 0.8) * 0.75, // 25% más rápido
+          ease: "none",
+          repeat: -1,
+          yoyo: true,
+          delay: (index * 0.5) * 0.75 // 25% más rápido
+        });
+      });
     };
 
     // Configurar hover para todas las cards de ADN
@@ -585,13 +570,16 @@ export default function Home() {
 
   return (
     <>
-      <Navigation />
+      <header>
+        <Navigation />
+      </header>
       
-      {/* Sección Hero - Bienvenidos */}
-      <section 
-        id="bienvenidos" 
-        className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20"
-      >
+      <main>
+        {/* Sección Hero - Bienvenidos */}
+        <section 
+          id="bienvenidos" 
+          className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20"
+        >
         {/* Fondo con patrón tecnológico neural */}
         <div className="absolute inset-0 z-0">
           <svg 
@@ -719,6 +707,17 @@ export default function Home() {
 
         {/* Contenido principal */}
         <div className="relative z-20 text-center px-4 max-w-6xl mx-auto">
+          {/* Isotipo Creative Hut con animación flotante */}
+          <div className="mb-8 animate-hero-float" style={{ animationDelay: '0.1s' }}>
+            <Image 
+              src="/brand/logos/isotipo-neon_celeste.svg" 
+              alt="Creative Hut - Agencia Digital Costa Rica - Logo Principal"
+              width={144}
+              height={144}
+              className="mx-auto opacity-90 hover:opacity-100 transition-opacity duration-300"
+            />
+          </div>
+          
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-8 bg-gradient-to-r from-blue-400 via-purple-500 to-cyan-400 bg-clip-text text-transparent animate-hero-float">
             Creative Hut
           </h1>
@@ -737,182 +736,107 @@ export default function Home() {
         id="nuestro-adn" 
         className="relative min-h-screen flex flex-col justify-center py-20 overflow-hidden"
       >
-        {/* Fondo creativo con bombillas, nubes y engranajes */}
+        {/* Fondo creativo con isotipos flotantes de Creative Hut */}
         <div className="absolute inset-0 z-0">
-          <svg 
-            ref={creativeBgRef}
-            className="w-full h-full opacity-50" 
-            viewBox="0 0 1920 1080" 
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <defs>
-              <linearGradient id="bulbGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#ffd700" />
-                <stop offset="50%" stopColor="#ffea00" />
-                <stop offset="100%" stopColor="#fff200" />
-              </linearGradient>
-              
-              <linearGradient id="cloudGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#87ceeb" />
-                <stop offset="50%" stopColor="#add8e6" />
-                <stop offset="100%" stopColor="#b0e0e6" />
-              </linearGradient>
-
-              <linearGradient id="gearGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#6c63ff" />
-                <stop offset="50%" stopColor="#8b7cf6" />
-                <stop offset="100%" stopColor="#a855f7" />
-              </linearGradient>
-            </defs>
-
-            {/* Bombillas - Ideas */}
-            <g className="creative-bulb" opacity="0.4">
-              <circle cx="300" cy="200" r="25" fill="url(#bulbGradient)"/>
-              <rect x="285" y="225" width="30" height="15" rx="3" fill="url(#bulbGradient)" opacity="0.8"/>
-              <path d="M290,210 Q300,205 310,210" stroke="url(#bulbGradient)" strokeWidth="2" fill="none" opacity="0.6"/>
-              <path d="M292,214 Q300,209 308,214" stroke="url(#bulbGradient)" strokeWidth="1.5" fill="none" opacity="0.5"/>
-            </g>
-
-            <g className="creative-bulb" opacity="0.3">
-              <circle cx="1500" cy="300" r="30" fill="url(#bulbGradient)"/>
-              <rect x="1483" y="330" width="34" height="18" rx="4" fill="url(#bulbGradient)" opacity="0.8"/>
-              <path d="M1485,315 Q1500,308 1515,315" stroke="url(#bulbGradient)" strokeWidth="2" fill="none" opacity="0.6"/>
-              <path d="M1488,320 Q1500,315 1512,320" stroke="url(#bulbGradient)" strokeWidth="1.5" fill="none" opacity="0.5"/>
-            </g>
-
-            <g className="creative-bulb" opacity="0.35">
-              <circle cx="800" cy="150" r="20" fill="url(#bulbGradient)"/>
-              <rect x="788" y="170" width="24" height="12" rx="2" fill="url(#bulbGradient)" opacity="0.8"/>
-              <path d="M792,157 Q800,153 808,157" stroke="url(#bulbGradient)" strokeWidth="1.5" fill="none" opacity="0.6"/>
-              <path d="M794,161 Q800,158 806,161" stroke="url(#bulbGradient)" strokeWidth="1" fill="none" opacity="0.5"/>
-            </g>
-
-            <g className="creative-bulb" opacity="0.4">
-              <circle cx="200" cy="600" r="28" fill="url(#bulbGradient)"/>
-              <rect x="182" y="628" width="36" height="16" rx="3" fill="url(#bulbGradient)" opacity="0.8"/>
-              <path d="M184,612 Q200,606 216,612" stroke="url(#bulbGradient)" strokeWidth="2" fill="none" opacity="0.6"/>
-              <path d="M187,617 Q200,612 213,617" stroke="url(#bulbGradient)" strokeWidth="1.5" fill="none" opacity="0.5"/>
-            </g>
-
-            <g className="creative-bulb" opacity="0.3">
-              <circle cx="1600" cy="700" r="22" fill="url(#bulbGradient)"/>
-              <rect x="1586" y="722" width="28" height="14" rx="3" fill="url(#bulbGradient)" opacity="0.8"/>
-              <path d="M1590,708 Q1600,704 1610,708" stroke="url(#bulbGradient)" strokeWidth="1.5" fill="none" opacity="0.6"/>
-              <path d="M1592,712 Q1600,709 1608,712" stroke="url(#bulbGradient)" strokeWidth="1" fill="none" opacity="0.5"/>
-            </g>
-
-            {/* Nubes - Imaginación */}
-            <g className="creative-cloud" opacity="0.35">
-              <ellipse cx="500" cy="250" rx="40" ry="25" fill="url(#cloudGradient)"/>
-              <ellipse cx="480" cy="235" rx="25" ry="20" fill="url(#cloudGradient)"/>
-              <ellipse cx="520" cy="235" rx="30" ry="22" fill="url(#cloudGradient)"/>
-              <ellipse cx="540" cy="250" rx="20" ry="15" fill="url(#cloudGradient)"/>
-            </g>
-
-            <g className="creative-cloud" opacity="0.3">
-              <ellipse cx="1200" cy="180" rx="50" ry="30" fill="url(#cloudGradient)"/>
-              <ellipse cx="1175" cy="160" rx="30" ry="25" fill="url(#cloudGradient)"/>
-              <ellipse cx="1225" cy="160" rx="35" ry="27" fill="url(#cloudGradient)"/>
-              <ellipse cx="1250" cy="180" rx="25" ry="18" fill="url(#cloudGradient)"/>
-            </g>
-
-            <g className="creative-cloud" opacity="0.4">
-              <ellipse cx="400" cy="450" rx="35" ry="22" fill="url(#cloudGradient)"/>
-              <ellipse cx="385" cy="435" rx="20" ry="18" fill="url(#cloudGradient)"/>
-              <ellipse cx="415" cy="435" rx="25" ry="20" fill="url(#cloudGradient)"/>
-              <ellipse cx="435" cy="450" rx="18" ry="14" fill="url(#cloudGradient)"/>
-            </g>
-
-            <g className="creative-cloud" opacity="0.3">
-              <ellipse cx="1400" cy="500" rx="45" ry="28" fill="url(#cloudGradient)"/>
-              <ellipse cx="1370" cy="480" rx="28" ry="23" fill="url(#cloudGradient)"/>
-              <ellipse cx="1430" cy="480" rx="32" ry="25" fill="url(#cloudGradient)"/>
-              <ellipse cx="1455" cy="500" rx="22" ry="16" fill="url(#cloudGradient)"/>
-            </g>
-
-            <g className="creative-cloud" opacity="0.35">
-              <ellipse cx="700" cy="800" rx="38" ry="24" fill="url(#cloudGradient)"/>
-              <ellipse cx="680" cy="785" rx="23" ry="19" fill="url(#cloudGradient)"/>
-              <ellipse cx="720" cy="785" rx="27" ry="21" fill="url(#cloudGradient)"/>
-              <ellipse cx="740" cy="800" rx="19" ry="15" fill="url(#cloudGradient)"/>
-            </g>
-
-            {/* Engranajes - Innovación Tecnológica */}
-            <g className="creative-gear" opacity="0.4">
-              <circle cx="650" cy="350" r="35" fill="none" stroke="url(#gearGradient)" strokeWidth="3"/>
-              <circle cx="650" cy="350" r="15" fill="url(#gearGradient)" opacity="0.6"/>
-              {Array.from({ length: 8 }, (_, i) => {
-                const angle = (i * 45) * Math.PI / 180;
-                const x1 = 650 + Math.cos(angle) * 25;
-                const y1 = 350 + Math.sin(angle) * 25;
-                const x2 = 650 + Math.cos(angle) * 40;
-                const y2 = 350 + Math.sin(angle) * 40;
-                return (
-                  <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="url(#gearGradient)" strokeWidth="4" strokeLinecap="round"/>
-                );
-              })}
-            </g>
-
-            <g className="creative-gear" opacity="0.35">
-              <circle cx="1100" cy="400" r="30" fill="none" stroke="url(#gearGradient)" strokeWidth="2.5"/>
-              <circle cx="1100" cy="400" r="12" fill="url(#gearGradient)" opacity="0.6"/>
-              {Array.from({ length: 6 }, (_, i) => {
-                const angle = (i * 60) * Math.PI / 180;
-                const x1 = 1100 + Math.cos(angle) * 20;
-                const y1 = 400 + Math.sin(angle) * 20;
-                const x2 = 1100 + Math.cos(angle) * 35;
-                const y2 = 400 + Math.sin(angle) * 35;
-                return (
-                  <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="url(#gearGradient)" strokeWidth="3.5" strokeLinecap="round"/>
-                );
-              })}
-            </g>
-
-            <g className="creative-gear" opacity="0.3">
-              <circle cx="300" cy="800" r="25" fill="none" stroke="url(#gearGradient)" strokeWidth="2"/>
-              <circle cx="300" cy="800" r="10" fill="url(#gearGradient)" opacity="0.6"/>
-              {Array.from({ length: 6 }, (_, i) => {
-                const angle = (i * 60) * Math.PI / 180;
-                const x1 = 300 + Math.cos(angle) * 17;
-                const y1 = 800 + Math.sin(angle) * 17;
-                const x2 = 300 + Math.cos(angle) * 28;
-                const y2 = 800 + Math.sin(angle) * 28;
-                return (
-                  <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="url(#gearGradient)" strokeWidth="3" strokeLinecap="round"/>
-                );
-              })}
-            </g>
-
-            <g className="creative-gear" opacity="0.4">
-              <circle cx="1500" cy="600" r="40" fill="none" stroke="url(#gearGradient)" strokeWidth="3"/>
-              <circle cx="1500" cy="600" r="18" fill="url(#gearGradient)" opacity="0.6"/>
-              {Array.from({ length: 10 }, (_, i) => {
-                const angle = (i * 36) * Math.PI / 180;
-                const x1 = 1500 + Math.cos(angle) * 28;
-                const y1 = 600 + Math.sin(angle) * 28;
-                const x2 = 1500 + Math.cos(angle) * 45;
-                const y2 = 600 + Math.sin(angle) * 45;
-                return (
-                  <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="url(#gearGradient)" strokeWidth="4" strokeLinecap="round"/>
-                );
-              })}
-            </g>
-
-            <g className="creative-gear" opacity="0.35">
-              <circle cx="900" cy="550" r="28" fill="none" stroke="url(#gearGradient)" strokeWidth="2.5"/>
-              <circle cx="900" cy="550" r="11" fill="url(#gearGradient)" opacity="0.6"/>
-              {Array.from({ length: 8 }, (_, i) => {
-                const angle = (i * 45) * Math.PI / 180;
-                const x1 = 900 + Math.cos(angle) * 19;
-                const y1 = 550 + Math.sin(angle) * 19;
-                const x2 = 900 + Math.cos(angle) * 32;
-                const y2 = 550 + Math.sin(angle) * 32;
-                return (
-                  <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="url(#gearGradient)" strokeWidth="3" strokeLinecap="round"/>
-                );
-              })}
-            </g>
-          </svg>
+          {/* Isotipo Full Color - Grande */}
+          <Image 
+            src="/brand/logos/isotipo-fullcolor.svg" 
+            alt="Creative Hut - Elemento decorativo de marca"
+            width={92}
+            height={92}
+            className="creative-isotope absolute opacity-30"
+            style={{ top: '15%', left: '20%' }}
+          />
+          
+          {/* Isotipo Neon Celeste - Mediano */}
+          <Image 
+            src="/brand/logos/isotipo-neon_celeste.svg" 
+            alt="Creative Hut - Elemento decorativo de marca"
+            width={74}
+            height={74}
+            className="creative-isotope absolute opacity-25"
+            style={{ top: '25%', right: '15%' }}
+          />
+          
+          {/* Isotipo Neon Rosa - Pequeño */}
+          <Image 
+            src="/brand/logos/isotipo-neon_rosa.svg" 
+            alt="Creative Hut - Elemento decorativo de marca"
+            width={55}
+            height={55}
+            className="creative-isotope absolute opacity-20"
+            style={{ top: '10%', left: '45%' }}
+          />
+          
+          {/* Isotipo Full Color - Mediano */}
+          <Image 
+            src="/brand/logos/isotipo-fullcolor.svg" 
+            alt="Creative Hut - Elemento decorativo de marca"
+            width={83}
+            height={83}
+            className="creative-isotope absolute opacity-25"
+            style={{ bottom: '30%', left: '10%' }}
+          />
+          
+          {/* Isotipo Neon Celeste - Grande */}
+          <Image 
+            src="/brand/logos/isotipo-neon_celeste.svg" 
+            alt="Creative Hut - Elemento decorativo de marca"
+            width={101}
+            height={101}
+            className="creative-isotope absolute opacity-30"
+            style={{ bottom: '20%', right: '25%' }}
+          />
+          
+          {/* Isotipo Neon Rosa - Mediano */}
+          <Image 
+            src="/brand/logos/isotipo-neon_rosa.svg" 
+            alt="Creative Hut - Elemento decorativo de marca"
+            width={64}
+            height={64}
+            className="creative-isotope absolute opacity-25"
+            style={{ top: '55%', left: '30%' }}
+          />
+          
+          {/* Isotipo Full Color - Pequeño */}
+          <Image 
+            src="/brand/logos/isotipo-fullcolor.svg" 
+            alt="Creative Hut - Elemento decorativo de marca"
+            width={46}
+            height={46}
+            className="creative-isotope absolute opacity-20"
+            style={{ bottom: '15%', left: '70%' }}
+          />
+          
+          {/* Isotipo Neon Celeste - Pequeño */}
+          <Image 
+            src="/brand/logos/isotipo-neon_celeste.svg" 
+            alt="Creative Hut - Elemento decorativo de marca"
+            width={55}
+            height={55}
+            className="creative-isotope absolute opacity-25"
+            style={{ top: '40%', right: '10%' }}
+          />
+          
+          {/* Isotipo Neon Rosa - Grande */}
+          <Image 
+            src="/brand/logos/isotipo-neon_rosa.svg" 
+            alt="Creative Hut - Elemento decorativo de marca"
+            width={92}
+            height={92}
+            className="creative-isotope absolute opacity-30"
+            style={{ bottom: '45%', right: '5%' }}
+          />
+          
+          {/* Isotipo Full Color - Extra Pequeño */}
+          <Image 
+            src="/brand/logos/isotipo-fullcolor.svg" 
+            alt="Creative Hut - Elemento decorativo de marca"
+            width={37}
+            height={37}
+            className="creative-isotope absolute opacity-15"
+            style={{ top: '70%', left: '60%' }}
+          />
         </div>
 
         <div className="container mx-auto px-4 relative z-10">
@@ -1304,9 +1228,11 @@ export default function Home() {
                     <SwiperSlide key={client.id}>
                       <div className="bg-white/10 backdrop-blur-sm p-6 sm:p-8 rounded-2xl text-center border border-white/20 hover:bg-white/20 transition-all duration-200">
                         <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 p-3 overflow-hidden">
-                          <img 
+                          <Image 
                             src={client.logo} 
                             alt={`Logo ${client.name}`}
+                            width={96}
+                            height={96}
                             className="w-full h-full object-contain filter brightness-90 hover:brightness-100 transition-all duration-200"
                             onError={(e) => {
                               // Fallback si la imagen no carga
@@ -1330,9 +1256,62 @@ export default function Home() {
           </div>
         </div>
       </section>
+      </main>
 
       {/* Contact Form Component */}
       <ContactForm />
+      
+      {/* Schema.org adicional para LocalBusiness */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "LocalBusiness",
+            "@id": "https://creativehutcr.com/#localbusiness",
+            "name": "Creative Hut",
+            "image": "https://creativehutcr.com/og-image.jpg",
+            "telephone": "+506-8888-8888",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "San José",
+              "addressLocality": "San José", 
+              "addressRegion": "San José",
+              "postalCode": "10101",
+              "addressCountry": "CR"
+            },
+            "geo": {
+              "@type": "GeoCoordinates",
+              "latitude": 9.9281,
+              "longitude": -84.0907
+            },
+            "url": "https://creativehutcr.com",
+            "sameAs": [
+              "https://www.facebook.com/creativehutcr",
+              "https://www.instagram.com/creativehutcr",
+              "https://www.linkedin.com/company/creativehutcr"
+            ],
+            "priceRange": "$$",
+            "openingHoursSpecification": {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": [
+                "Monday",
+                "Tuesday",
+                "Wednesday", 
+                "Thursday",
+                "Friday"
+              ],
+              "opens": "08:00",
+              "closes": "17:00"
+            },
+            "aggregateRating": {
+              "@type": "AggregateRating",
+              "ratingValue": "5.0",
+              "reviewCount": "25"
+            }
+          }),
+        }}
+      />
     </>
   );
 }

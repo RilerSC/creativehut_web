@@ -72,6 +72,7 @@
  * - useRef: Para referencias directas a elementos DOM
  */
 import { useState, useRef } from 'react';
+import Image from 'next/image';
 
 // ============================================================================
 // INTERFACES - Definición de tipos TypeScript
@@ -282,6 +283,13 @@ export default function ContactForm() {
               className="group relative px-12 py-4 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white font-semibold text-lg rounded-full overflow-hidden transform transition-all duration-200 hover:scale-105 hover:shadow-2xl"
             >
               <span className="relative z-10 flex items-center justify-center">
+                <Image 
+                  src="/brand/logos/isotipo-fullcolor.svg" 
+                  alt="Creative Hut - Agencia Digital Costa Rica"
+                  width={26}
+                  height={26}
+                  className="mr-2 opacity-90 group-hover:opacity-100 transition-opacity filter brightness-0 invert"
+                />
                 Hablemos
                 <svg className="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -454,7 +462,16 @@ export default function ContactForm() {
                       Enviando...
                     </span>
                   ) : (
-                    'Enviar 🚀'
+                    <span className="flex items-center justify-center">
+                      <Image 
+                        src="/brand/logos/isotipo-fullcolor.svg" 
+                        alt="Creative Hut - Agencia Digital Costa Rica"
+                        width={26}
+                        height={26}
+                        className="mr-2 opacity-90 group-hover:opacity-100 transition-opacity filter brightness-0 invert"
+                      />
+                      Enviar 🚀
+                    </span>
                   )}
                 </button>
               </div>

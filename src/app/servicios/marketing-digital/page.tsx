@@ -48,12 +48,87 @@ export default function MarketingDigitalPage() {
     }
   }, []);
 
+  // Schema.org para el servicio de marketing digital
+  const marketingSchema = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "name": "Marketing Digital",
+    "description": "Servicios de marketing digital y publicidad en Costa Rica. Transformamos ideas en contenido visual con propósito, claridad y estilo para tu marca.",
+    "provider": {
+      "@type": "Organization",
+      "name": "Creative Hut",
+      "url": "https://creativehutcr.com"
+    },
+    "areaServed": {
+      "@type": "Country",
+      "name": "Costa Rica"
+    },
+    "serviceType": "Digital Marketing",
+    "category": "Marketing Services",
+    "offers": {
+      "@type": "Offer",
+      "description": "Estrategias de marketing digital, gestión de redes sociales, publicidad digital y creación de contenido",
+      "seller": {
+        "@type": "Organization",
+        "name": "Creative Hut"
+      }
+    },
+    "hasOfferCatalog": {
+      "@type": "OfferCatalog",
+      "name": "Servicios de Marketing Digital",
+      "itemListElement": [
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Gestión de Redes Sociales",
+            "description": "Estrategias que convierten followers en comunidad y comunidad en clientes"
+          }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Publicidad Digital",
+            "description": "Campañas inteligentes que llegan a quien realmente importa"
+          }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Análisis y Métricas",
+            "description": "Datos que cuentan historias reales sobre tu audiencia"
+          }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Creación de Contenido",
+            "description": "Contenido que conecta, inspira y mueve a la acción"
+          }
+        }
+      ]
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gray-900">
-      <Navigation />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(marketingSchema),
+        }}
+      />
+      <div className="min-h-screen bg-gray-900">
+      <header>
+        <Navigation />
+      </header>
       
-      {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center px-6 py-20 overflow-hidden">
+      <main>
+        {/* Hero Section */}
+        <section className="relative min-h-screen flex items-center justify-center px-6 py-20 overflow-hidden">
         {/* Background Elements */}
         <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-black"></div>
         <div className="absolute inset-0 bg-gradient-to-r from-violet-600/10 via-purple-600/15 to-blue-600/10"></div>
@@ -261,9 +336,11 @@ export default function MarketingDigitalPage() {
           </div>
         </div>
       </section>
+      </main>
 
       {/* Contact Section */}
       <ContactForm />
-    </div>
+      </div>
+    </>
   );
 }

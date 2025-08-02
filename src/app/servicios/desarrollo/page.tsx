@@ -49,12 +49,79 @@ export default function DesarrolloPage() {
     }
   }, []);
 
+  // Schema.org para el servicio de desarrollo web
+  const webDevelopmentSchema = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "name": "Desarrollo Web Profesional",
+    "description": "Desarrollo web profesional en Costa Rica. Creamos sitios web, aplicaciones y plataformas digitales que conectan, convierten y escalan con tu negocio.",
+    "provider": {
+      "@type": "Organization",
+      "name": "Creative Hut",
+      "url": "https://creativehutcr.com"
+    },
+    "areaServed": {
+      "@type": "Country",
+      "name": "Costa Rica"
+    },
+    "serviceType": "Web Development",
+    "category": "Technology Services",
+    "offers": {
+      "@type": "Offer",
+      "description": "Desarrollo de sitios web corporativos, tiendas online y portafolios digitales",
+      "seller": {
+        "@type": "Organization",
+        "name": "Creative Hut"
+      }
+    },
+    "hasOfferCatalog": {
+      "@type": "OfferCatalog",
+      "name": "Servicios de Desarrollo Web",
+      "itemListElement": [
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Sitios Corporativos",
+            "description": "Plataformas profesionales que transmiten confianza y generan resultados medibles"
+          }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service", 
+            "name": "Tiendas Online",
+            "description": "E-commerce completos con pasarelas de pago, gestión de inventario y herramientas de marketing"
+          }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Portafolios Digitales", 
+            "description": "Showcases únicos que destacan tu trabajo y atraen a los clientes ideales"
+          }
+        }
+      ]
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gray-900">
-      <Navigation />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(webDevelopmentSchema),
+        }}
+      />
+      <div className="min-h-screen bg-gray-900">
+        <header>
+          <Navigation />
+        </header>
       
-      {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center px-6 py-20 overflow-hidden">
+      <main>
+        {/* Hero Section */}
+        <section className="relative min-h-screen flex items-center justify-center px-6 py-20 overflow-hidden">
         {/* Background Elements */}
         <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-black"></div>
         <div className="absolute inset-0 bg-gradient-to-r from-cyan-600/10 via-teal-600/15 to-emerald-600/10"></div>
@@ -77,10 +144,8 @@ export default function DesarrolloPage() {
           {/* Main Title */}
           <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight animate-hero-float">
             <span className="bg-gradient-to-r from-cyan-400 via-teal-400 to-emerald-400 bg-clip-text text-transparent">
-              Desarrollo
+              Desarrollo Web
             </span>
-            <br />
-            <span className="text-white">Web</span>
           </h1>
 
           {/* Subtitle */}
@@ -205,8 +270,10 @@ export default function DesarrolloPage() {
           </Link>
         </div>
       </section>
+      </main>
 
       <ContactForm />
-    </div>
+      </div>
+    </>
   );
 }

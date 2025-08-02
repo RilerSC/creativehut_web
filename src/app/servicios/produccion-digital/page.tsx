@@ -1,5 +1,9 @@
 /**
- * ===============================================
+ * =============import React, { useEffect } from 'react';
+import Navigation from '@/components/Navigation';
+import ContactForm from '@/components/ContactForm';
+
+export default function ProduccionDigitalPage() {=============================
  * CREATIVE HUT WEBSITE - PROPIEDAD INTELECTUAL
  * ===============================================
  * 
@@ -48,12 +52,87 @@ export default function ProduccionDigitalPage() {
     }
   }, []);
 
+  // Schema.org para el servicio de producción digital
+  const productionSchema = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "name": "Producción Digital",
+    "description": "Producción de contenido audiovisual en Costa Rica. Videos corporativos, campañas publicitarias y producciones de alto impacto para tu marca.",
+    "provider": {
+      "@type": "Organization",
+      "name": "Creative Hut",
+      "url": "https://creativehutcr.com"
+    },
+    "areaServed": {
+      "@type": "Country",
+      "name": "Costa Rica"
+    },
+    "serviceType": "Video Production",
+    "category": "Media Production",
+    "offers": {
+      "@type": "Offer",
+      "description": "Producción audiovisual profesional, videos corporativos, comerciales y contenido digital",
+      "seller": {
+        "@type": "Organization",
+        "name": "Creative Hut"
+      }
+    },
+    "hasOfferCatalog": {
+      "@type": "OfferCatalog",
+      "name": "Servicios de Producción Digital",
+      "itemListElement": [
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Videos Corporativos",
+            "description": "Contenido que cuenta la historia de tu empresa con autenticidad"
+          }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Comerciales Publicitarios",
+            "description": "Piezas que capturan atención y convierten en segundos"
+          }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Fotografía Corporativa",
+            "description": "Imágenes que reflejan la esencia profesional de tu marca"
+          }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Fotografía de Productos",
+            "description": "Imágenes que venden antes de que el cliente toque el producto"
+          }
+        }
+      ]
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gray-900">
-      <Navigation />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(productionSchema),
+        }}
+      />
+      <div className="min-h-screen bg-gray-900">
+      <header>
+        <Navigation />
+      </header>
       
-      {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center px-6 py-20 overflow-hidden">
+      <main>
+        {/* Hero Section */}
+        <section className="relative min-h-screen flex items-center justify-center px-6 py-20 overflow-hidden">
         {/* Background Elements */}
         <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-black"></div>
         <div className="absolute inset-0 bg-gradient-to-r from-pink-600/10 via-rose-600/15 to-purple-600/10"></div>
@@ -336,9 +415,11 @@ export default function ProduccionDigitalPage() {
           </div>
         </div>
       </section>
+      </main>
 
       {/* Contact Form Component */}
       <ContactForm />
-    </div>
+      </div>
+    </>
   );
 }
