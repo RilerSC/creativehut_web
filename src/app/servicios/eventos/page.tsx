@@ -142,7 +142,7 @@ export default function EventosPage() {
 
         <div className="relative z-10 max-w-6xl mx-auto text-center">
           {/* Service Icon */}
-          <div className="w-32 h-32 mx-auto mb-8 bg-gradient-to-br from-yellow-500 via-orange-500 to-red-600 rounded-3xl flex items-center justify-center shadow-2xl">
+          <div className="w-32 h-32 mx-auto mb-8 bg-gradient-to-br from-yellow-500 via-orange-500 to-red-600 rounded-3xl flex items-center justify-center shadow-2xl animate-hero-float">
             <svg className="w-16 h-16 text-white" fill="currentColor" viewBox="0 0 24 24">
               <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
             </svg>

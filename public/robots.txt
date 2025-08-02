@@ -1,12 +1,40 @@
+# Creative Hut - Robots.txt
+# Actualizado: 2 de agosto de 2025
+# Sitio web: https://creativehutcr.com
+
 User-agent: *
 Allow: /
 
-# Specifically allow our service pages
+# Permitir específicamente todas las páginas importantes
 Allow: /servicios/
-Allow: /servicios/publicidad-digital
+Allow: /servicios/desarrollo
 Allow: /servicios/marketing-digital
 Allow: /servicios/produccion-digital
 Allow: /servicios/eventos
-Allow: /servicios/desarrollo
 
+# Bloquear archivos de desarrollo y privados
+Disallow: /api/
+Disallow: /_next/static/
+Disallow: /.well-known/
+Disallow: /admin/
+Disallow: /private/
+
+# Permitir bots de redes sociales específicos
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
+
+User-agent: LinkedInBot
+Allow: /
+
+# Configuración para bots de imágenes
+User-agent: Googlebot-Image
+Allow: /
+
+# Referencia al sitemap
 Sitemap: https://creativehutcr.com/sitemap.xml
+
+# Host principal (opcional pero recomendado)
+Host: https://creativehutcr.com

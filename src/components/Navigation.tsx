@@ -21,6 +21,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAnimations } from '@/hooks/useAnimations';
 
@@ -153,9 +154,20 @@ export default function Navigation() {
           <div ref={logoRef} className="flex-shrink-0" style={{ opacity: 1, transform: 'translateX(0)' }}>
             <Link 
               href="/" 
-              className="text-2xl font-bold bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent hover:from-purple-400 hover:to-blue-400 transition-all duration-300"
+              className="flex items-center space-x-3 hover:opacity-80 transition-all duration-300 group"
             >
-              Creative Hut
+              <div className="isotipo-gradient">
+                <Image
+                  src="/brand/logos/isotipo-neon_celeste.svg"
+                  alt="Creative Hut"
+                  width={40}
+                  height={40}
+                  className="w-10 h-10"
+                />
+              </div>
+              <span className="text-2xl font-bold bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent group-hover:from-purple-400 group-hover:to-blue-400 transition-all duration-300">
+                Creative Hut
+              </span>
             </Link>
           </div>
 

@@ -146,7 +146,7 @@ export default function ProduccionDigitalPage() {
 
         <div className="relative z-10 max-w-6xl mx-auto text-center">
           {/* Service Icon */}
-          <div className="w-32 h-32 mx-auto mb-8 bg-gradient-to-br from-pink-600 via-rose-600 to-purple-600 rounded-3xl flex items-center justify-center shadow-2xl">
+          <div className="w-32 h-32 mx-auto mb-8 bg-gradient-to-br from-pink-600 via-rose-600 to-purple-600 rounded-3xl flex items-center justify-center shadow-2xl animate-hero-float">
             <svg className="w-16 h-16 text-white" fill="currentColor" viewBox="0 0 20 20">
               <path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v2.586l2.707-2.707A1 1 0 0116 6.586V13.414a1 1 0 01-1.707.707L12 11.414V14a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/>
             </svg>

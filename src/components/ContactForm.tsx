@@ -213,25 +213,49 @@ export default function ContactForm() {
           <div className="grid md:grid-cols-3 gap-8 mb-12">
             {/* Teléfono */}
             <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
-                </svg>
-              </div>
+              <a 
+                href="tel:+50672811381"
+                className="block w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full mx-auto mb-4 hover:scale-105 hover:shadow-xl transition-all duration-300 cursor-pointer"
+                title="Llamar al +506 7281 1381"
+              >
+                <div className="w-full h-full flex items-center justify-center">
+                  <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                  </svg>
+                </div>
+              </a>
               <h3 className="text-white font-semibold mb-2">Teléfono</h3>
-              <p className="text-gray-400">+506 7281 1381</p>
+              <a 
+                href="tel:+50672811381"
+                className="text-gray-400 hover:text-blue-400 transition-colors duration-300 cursor-pointer"
+                title="Llamar al +506 7281 1381"
+              >
+                +506 7281 1381
+              </a>
             </div>
 
             {/* Email */}
             <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                  <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-                </svg>
-              </div>
+              <a 
+                href="mailto:hola@creativehutcr.com"
+                className="block w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full mx-auto mb-4 hover:scale-105 hover:shadow-xl transition-all duration-300 cursor-pointer"
+                title="Enviar email a hola@creativehutcr.com"
+              >
+                <div className="w-full h-full flex items-center justify-center">
+                  <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                  </svg>
+                </div>
+              </a>
               <h3 className="text-white font-semibold mb-2">Email</h3>
-              <p className="text-gray-400">hola@creativehutcr.com</p>
+              <a 
+                href="mailto:hola@creativehutcr.com"
+                className="text-gray-400 hover:text-purple-400 transition-colors duration-300 cursor-pointer"
+                title="Enviar email a hola@creativehutcr.com"
+              >
+                hola@creativehutcr.com
+              </a>
             </div>
 
             {/* Redes Sociales */}
