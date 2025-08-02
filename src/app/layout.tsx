@@ -109,8 +109,8 @@ export default function RootLayout({
     "sameAs": [
       "https://www.facebook.com/creativehutcr",
       "https://www.instagram.com/creativehutcr",
-      "https://www.linkedin.com/company/creativehutcr",
-      "https://twitter.com/creativehutcr"
+      /* "https://www.linkedin.com/company/creativehutcr",
+      "https://twitter.com/creativehutcr" */
     ],
     "foundingDate": "2020",
     "founders": [
