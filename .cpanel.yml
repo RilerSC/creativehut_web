@@ -1,0 +1,8 @@
+---
+deployment:
+  tasks:
+    - export NODE_ENV=production
+    - /usr/local/bin/npm ci
+    - /usr/local/bin/npm run build
+    - /bin/touch tmp/restart.txt
+
