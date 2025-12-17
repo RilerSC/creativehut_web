@@ -173,12 +173,29 @@ export default function ContactForm() {
           setSubmitMessage('');
         }, 3000);
       } else {
-        const errorData = await response.json();
-        setSubmitMessage(errorData.error || 'Error al enviar el mensaje. Inténtalo de nuevo.');
+        // Intentar extraer el mensaje de error del response
+        let errorMessage = 'Error al enviar el mensaje. Inténtalo de nuevo.';
+        try {
+          const errorData = await response.json();
+          if (errorData && errorData.error) {
+            errorMessage = errorData.error;
+          }
+        } catch (parseError) {
+          // Si no se puede parsear JSON, usar mensaje genérico o status
+          if (response.status === 400) {
+            errorMessage = 'Error de validación. Por favor, verifica que todos los campos estén correctamente completados.';
+          } else if (response.status === 429) {
+            errorMessage = 'Demasiadas solicitudes. Por favor, espera un momento e inténtalo de nuevo.';
+          } else if (response.status >= 500) {
+            errorMessage = 'Error del servidor. Por favor, inténtalo más tarde.';
+          }
+          console.error('Error parseando respuesta:', parseError);
+        }
+        setSubmitMessage(errorMessage);
         setSubmitSuccess(false);
       }
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Error en el formulario:', error);
       setSubmitMessage('Error de conexión. Verifica tu internet e inténtalo de nuevo.');
       setSubmitSuccess(false);
     } finally {

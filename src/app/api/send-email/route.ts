@@ -21,89 +21,68 @@
  * @fileoverview API Route para envío de emails desde formularios de contacto
  * @description Este archivo implementa un endpoint API que procesa las solicitudes
  * de contacto desde los formularios del sitio web y las envía por email usando
- * Microsoft 365 SMTP. Utiliza el sistema de App Router de Next.js 13+.
+ * Gmail SMTP. Utiliza el sistema de App Router de Next.js 13+.
  * 
  * @module SendEmailAPI
- * @version 1.0.0
+ * @version 2.0.0 - Versión con mitigaciones de seguridad OWASP
  * @author José Ríler Solórzano Campos <web@creativehutcr.com>
  * @company DEVIT506 - www.devit506.net
  * @since 2025-07-28
  * 
  * @requires next/server - Framework Next.js para manejo de requests/responses
  * @requires nodemailer - Librería para envío de emails vía SMTP
- * 
- * @dependencies
- * - Variables de entorno: EMAIL_USER, EMAIL_PASS, EMAIL_FROM, EMAIL_TO
- * - Configuración SMTP: Microsoft 365 (smtp.office365.com:587)
- * - Componentes que consumen: ContactForm.tsx (src/components/)
+ * @requires validator - Validación de datos
+ * @requires isomorphic-dompurify - Sanitización XSS
  * 
  * @security
- * - Validación de campos requeridos
- * - Sanitización de contenido HTML
- * - Autenticación SMTP segura
- * - Rate limiting (debe implementarse a nivel de servidor)
+ * ✅ Sanitización XSS implementada
+ * ✅ Validación robusta de inputs
+ * ✅ TLS 1.2+ configurado
+ * ✅ Rate limiting básico
+ * ✅ Validación de variables de entorno
+ * ✅ Logging seguro
  */
 
 // ============================================================================
 // IMPORTS - Dependencias externas del framework y librerías
 // ============================================================================
 
-/**
- * NextRequest y NextResponse provienen de 'next/server'
- * - Son parte del core de Next.js 13+ App Router
- * - NextRequest: Extiende la Web API Request con funcionalidades de Next.js
- * - NextResponse: Extiende la Web API Response con helpers de Next.js
- * - Usados para manejar HTTP requests/responses en API Routes
- */
 import { NextRequest, NextResponse } from 'next/server';
-
-/**
- * nodemailer es una librería externa para envío de emails en Node.js
- * - Instalada vía npm: "nodemailer": "^6.9.8"
- * - Permite conectar con diversos proveedores SMTP (Gmail, Outlook, etc.)
- * - Soporta autenticación, attachments, HTML/text emails
- * - Documentación: https://nodemailer.com/
- */
 import nodemailer from 'nodemailer';
+import validator from 'validator';
+import DOMPurify from 'isomorphic-dompurify';
 
 // ============================================================================
 // INTERFACES - Definición de tipos para el formulario
 // ============================================================================
 
-/**
- * @interface ContactFormData
- * @description Estructura de datos que llega desde el formulario de contacto
- * @property {string} fullName - Nombre completo del usuario (requerido)
- * @property {string} email - Email del usuario (requerido, validado)
- * @property {string} [phone] - Teléfono del usuario (opcional)
- * @property {string} [service] - Servicio de interés (opcional)
- * @property {string} message - Mensaje del usuario (requerido)
- */
 interface ContactFormData {
   fullName: string;
   email: string;
   phone?: string;
   service?: string;
   message: string;
+  consent?: boolean;
 }
 
-/**
- * @interface ServiceMapping
- * @description Mapeo de códigos de servicio a nombres legibles
- */
 interface ServiceMapping {
   [key: string]: string;
 }
 
+interface ValidationResult {
+  valid: boolean;
+  error?: string;
+}
+
+interface RateLimitEntry {
+  count: number;
+  resetTime: number;
+}
+
 // ============================================================================
-// CONFIGURACIÓN - Constantes del sistema
+// CONSTANTES - Configuración del sistema
 // ============================================================================
 
-/**
- * @constant SERVICE_NAMES
- * @description Mapeo de identificadores de servicios a nombres legibles
- * @type {ServiceMapping}
- */
 const SERVICE_NAMES: ServiceMapping = {
   'publicidad-digital': 'Publicidad Digital',
   'marketing-digital': 'Marketing Digital', 
@@ -113,184 +92,399 @@ const SERVICE_NAMES: ServiceMapping = {
   'otro': 'Otro'
 };
 
+// Límites de validación
+const MAX_LENGTHS = {
+  fullName: 100,
+  email: 254,
+  phone: 20,
+  message: 5000,
+  service: 50
+};
+
+// Rate limiting: 5 requests por hora por IP
+const RATE_LIMIT = {
+  maxRequests: 5,
+  windowMs: 60 * 60 * 1000, // 1 hora
+};
+
+// Cache simple en memoria para rate limiting (en producción usar Redis)
+const rateLimitCache = new Map<string, RateLimitEntry>();
+
+// ============================================================================
+// FUNCIONES DE SEGURIDAD
+// ============================================================================
+
+/**
+ * Sanitiza HTML para prevenir XSS
+ */
+function sanitizeHtml(str: string): string {
+  return DOMPurify.sanitize(str, { 
+    ALLOWED_TAGS: [],  // No permitir HTML
+    ALLOWED_ATTR: [] 
+  });
+}
+
+/**
+ * Escapa caracteres especiales para atributos HTML
+ */
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;');
+}
+
+/**
+ * Valida variables de entorno requeridas
+ */
+function validateEnvVars(): void {
+  const required = ['SMTP_USER', 'SMTP_PASSWORD', 'SMTP_FROM', 'SMTP_TO'];
+  const missing = required.filter(key => !process.env[key]);
+  
+  if (missing.length > 0) {
+    throw new Error(`Variables de entorno faltantes: ${missing.join(', ')}`);
+  }
+  
+  // Validar formato de emails
+  if (!validator.isEmail(process.env.SMTP_FROM || '')) {
+    throw new Error('SMTP_FROM no es un email válido');
+  }
+  
+  if (!validator.isEmail(process.env.SMTP_TO || '')) {
+    throw new Error('SMTP_TO no es un email válido');
+  }
+  
+  // Validar que SMTP_USER sea un email válido
+  if (!validator.isEmail(process.env.SMTP_USER || '')) {
+    throw new Error('SMTP_USER no es un email válido');
+  }
+}
+
+/**
+ * Valida y sanitiza los datos del formulario
+ */
+function validateInput(data: ContactFormData): ValidationResult {
+  // Validar campos requeridos (ya validados antes, pero double-check)
+  if (!data.fullName || !data.email || !data.message) {
+    return { valid: false, error: 'Nombre, email y mensaje son requeridos' };
+  }
+  
+  // Normalizar strings (trim)
+  const normalizedFullName = data.fullName.trim();
+  const normalizedEmail = data.email.trim();
+  const normalizedMessage = data.message.trim();
+  
+  // Validar que no estén vacíos después de trim
+  if (normalizedFullName.length === 0) {
+    return { valid: false, error: 'El nombre no puede estar vacío' };
+  }
+  
+  if (normalizedEmail.length === 0) {
+    return { valid: false, error: 'El email no puede estar vacío' };
+  }
+  
+  if (normalizedMessage.length === 0) {
+    return { valid: false, error: 'El mensaje no puede estar vacío' };
+  }
+  
+  // Validar longitud
+  if (normalizedFullName.length > MAX_LENGTHS.fullName) {
+    return { valid: false, error: `Nombre demasiado largo (máximo ${MAX_LENGTHS.fullName} caracteres)` };
+  }
+  
+  if (normalizedMessage.length > MAX_LENGTHS.message) {
+    return { valid: false, error: `Mensaje demasiado largo (máximo ${MAX_LENGTHS.message} caracteres)` };
+  }
+  
+  if (normalizedMessage.length < 5) {
+    return { valid: false, error: 'El mensaje debe tener al menos 5 caracteres' };
+  }
+  
+  // Validar formato de email
+  if (!validator.isEmail(normalizedEmail)) {
+    return { valid: false, error: 'Email inválido. Por favor, verifica el formato del email.' };
+  }
+  
+  // Validar teléfono si existe
+  if (data.phone && data.phone.trim().length > 0) {
+    const normalizedPhone = data.phone.trim();
+    if (normalizedPhone.length > MAX_LENGTHS.phone) {
+      return { valid: false, error: `Teléfono demasiado largo (máximo ${MAX_LENGTHS.phone} caracteres)` };
+    }
+    // Validar formato básico de teléfono (permite +, números, espacios, guiones, paréntesis)
+    if (!/^[\d\s\+\-\(\)]+$/.test(normalizedPhone)) {
+      return { valid: false, error: 'Teléfono contiene caracteres inválidos. Solo se permiten números, espacios, +, -, y paréntesis.' };
+    }
+  }
+  
+  // Validar nombre (solo letras, espacios, acentos y algunos caracteres especiales)
+  // Permitir nombres más flexibles
+  if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s\-'\.]+$/.test(normalizedFullName)) {
+    return { valid: false, error: 'El nombre contiene caracteres inválidos. Solo se permiten letras, espacios, guiones y apóstrofes.' };
+  }
+  
+  // Validar servicio contra lista blanca
+  if (data.service && data.service.trim().length > 0) {
+    const normalizedService = data.service.trim();
+    if (normalizedService.length > MAX_LENGTHS.service) {
+      return { valid: false, error: 'Servicio inválido' };
+    }
+    if (!SERVICE_NAMES[normalizedService]) {
+      return { valid: false, error: 'Servicio seleccionado no es válido' };
+    }
+  }
+  
+  return { valid: true };
+}
+
+/**
+ * Rate limiting básico (en producción usar Redis)
+ */
+function checkRateLimit(ip: string): { allowed: boolean; remaining: number } {
+  const now = Date.now();
+  const entry = rateLimitCache.get(ip);
+  
+  // Limpiar entradas expiradas
+  if (entry && entry.resetTime < now) {
+    rateLimitCache.delete(ip);
+  }
+  
+  const currentEntry = rateLimitCache.get(ip);
+  
+  if (!currentEntry) {
+    // Primera solicitud
+    rateLimitCache.set(ip, {
+      count: 1,
+      resetTime: now + RATE_LIMIT.windowMs
+    });
+    return { allowed: true, remaining: RATE_LIMIT.maxRequests - 1 };
+  }
+  
+  if (currentEntry.count >= RATE_LIMIT.maxRequests) {
+    return { allowed: false, remaining: 0 };
+  }
+  
+  // Incrementar contador
+  currentEntry.count++;
+  rateLimitCache.set(ip, currentEntry);
+  
+  return { allowed: true, remaining: RATE_LIMIT.maxRequests - currentEntry.count };
+}
+
+/**
+ * Logging seguro (no expone información sensible)
+ */
+function logEmailAttempt(ip: string, email: string, success: boolean, error?: Error | unknown): void {
+  const timestamp = new Date().toISOString();
+  const emailMasked = email.substring(0, 3) + '***@' + email.split('@')[1];
+  
+  if (success) {
+    console.log(`[${timestamp}] Email enviado exitosamente - IP: ${ip} - Email: ${emailMasked}`);
+  } else {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error(`[${timestamp}] Error enviando email - IP: ${ip} - Email: ${emailMasked} - Error: ${errorMessage}`);
+  }
+}
+
 // ============================================================================
 // API HANDLER - Función principal del endpoint
 // ============================================================================
 
-/**
- * @function POST
- * @description Handler principal para requests POST al endpoint /api/send-email
- * 
- * @async
- * @param {NextRequest} request - Objeto request de Next.js con datos del formulario
- * @returns {Promise<NextResponse>} Response con status 200 (éxito) o error (400/500)
- * 
- * @throws {Error} 400 - Campos requeridos faltantes
- * @throws {Error} 500 - Error interno del servidor/SMTP
- * 
- * @example
- * // Desde el frontend (ContactForm.tsx):
- * fetch('/api/send-email', {
- *   method: 'POST',
- *   headers: { 'Content-Type': 'application/json' },
- *   body: JSON.stringify({
- *     fullName: 'Juan Pérez',
- *     email: 'juan@example.com',
- *     phone: '+506 1234-5678',
- *     service: 'desarrollo',
- *     message: 'Necesito una aplicación web'
- *   })
- * })
- * 
- * @workflow
- * 1. Extrae datos del request JSON
- * 2. Valida campos requeridos
- * 3. Configura transporter SMTP
- * 4. Verifica conexión SMTP
- * 5. Mapea servicio a nombre legible
- * 6. Construye email HTML/text
- * 7. Envía email
- * 8. Retorna respuesta de éxito o error
- */
 export async function POST(request: NextRequest) {
-  // ========================================================================
-  // MANEJO DE ERRORES Y PROCESAMIENTO DE DATOS
-  // ========================================================================
+  const startTime = Date.now();
+  let clientIp = 'unknown';
   
   try {
-    // ======================================================================
-    // EXTRACCIÓN DE DATOS - Parsing del JSON del request
-    // ======================================================================
+    // Obtener IP del cliente
+    clientIp = request.headers.get('x-forwarded-for')?.split(',')[0] || 
+               request.headers.get('x-real-ip') || 
+               'unknown';
     
-    /**
-     * Destructuring de los datos del formulario enviados desde ContactForm.tsx
-     * - request.json() es un método de NextRequest que parsea el body JSON
-     * - Los datos vienen del componente ContactForm en /src/components/ContactForm.tsx
-     * - El tipo implícito es ContactFormData según la interface definida arriba
-     */
-    const { fullName, email, phone, service, message }: ContactFormData = await request.json();
-
-    // ======================================================================
-    // VALIDACIÓN DE DATOS - Verificación de campos requeridos
-    // ======================================================================
+    // Validar variables de entorno
+    validateEnvVars();
     
-    /**
-     * Validación básica de campos obligatorios
-     * - fullName: Nombre completo del usuario (string no vacío)
-     * - email: Email del usuario (string no vacío, validación básica)
-     * - message: Mensaje del usuario (string no vacío)
-     * - phone y service son opcionales
-     * 
-     * Si falta algún campo requerido, retorna error 400 (Bad Request)
-     */
-    if (!fullName || !email || !message) {
+    // Verificar rate limiting
+    const rateLimit = checkRateLimit(clientIp);
+    if (!rateLimit.allowed) {
       return NextResponse.json(
-        { error: 'Nombre, email y mensaje son requeridos' },
+        { error: 'Demasiadas solicitudes. Por favor, intenta más tarde.' },
+        { status: 429, headers: { 'Retry-After': '3600' } }
+      );
+    }
+    
+    // Extraer datos del request
+    let requestData: ContactFormData;
+    try {
+      requestData = await request.json();
+    } catch (error) {
+      console.error('[API] Error parsing JSON:', error);
+      return NextResponse.json(
+        { error: 'Formato de datos inválido. Por favor, verifica que todos los campos estén correctamente completados.' },
         { status: 400 }
       );
     }
-
-    // ======================================================================
-    // CONFIGURACIÓN SMTP - Setup del transporter de nodemailer
-    // ======================================================================
     
-    /**
-     * @description Configuración del transporter SMTP para Microsoft 365
-     * 
-     * @property {string} host - Servidor SMTP de Microsoft 365
-     * @property {number} port - Puerto 587 para STARTTLS (recomendado)
-     * @property {boolean} secure - false para puerto 587, true para 465
-     * @property {object} auth - Credenciales de autenticación
-     * @property {string} auth.user - Email de la cuenta (desde .env.local)
-     * @property {string} auth.pass - Password de aplicación (desde .env.local)
-     * @property {object} tls - Configuración TLS para compatibilidad
-     * 
-     * Variables de entorno requeridas en .env.local:
-     * - EMAIL_USER=web@creativehutcr.com
-     * - EMAIL_PASS=password_de_aplicacion_microsoft365
-     */
+    // Log seguro de los datos recibidos (sin información sensible completa)
+    console.log('[API] Datos recibidos:', {
+      hasFullName: !!requestData.fullName,
+      hasEmail: !!requestData.email,
+      hasMessage: !!requestData.message,
+      hasPhone: !!requestData.phone,
+      hasService: !!requestData.service,
+      consent: requestData.consent,
+      messageLength: requestData.message?.length || 0
+    });
+    
+    const { fullName, email, phone, service, message, consent } = requestData;
+    
+    // Validar consentimiento
+    if (!consent) {
+      console.log('[API] Validación fallida: consentimiento no aceptado');
+      return NextResponse.json(
+        { error: 'Debes aceptar ser contactado para enviar el formulario' },
+        { status: 400 }
+      );
+    }
+    
+    // Validar que los campos requeridos existan y no sean solo espacios en blanco
+    if (!fullName || typeof fullName !== 'string' || fullName.trim().length === 0) {
+      console.log('[API] Validación fallida: nombre vacío o inválido');
+      return NextResponse.json(
+        { error: 'El nombre es requerido y no puede estar vacío' },
+        { status: 400 }
+      );
+    }
+    
+    if (!email || typeof email !== 'string' || email.trim().length === 0) {
+      console.log('[API] Validación fallida: email vacío o inválido');
+      return NextResponse.json(
+        { error: 'El email es requerido y no puede estar vacío' },
+        { status: 400 }
+      );
+    }
+    
+    if (!message || typeof message !== 'string' || message.trim().length === 0) {
+      console.log('[API] Validación fallida: mensaje vacío o inválido');
+      return NextResponse.json(
+        { error: 'El mensaje es requerido y no puede estar vacío' },
+        { status: 400 }
+      );
+    }
+    
+    // Normalizar datos (trim) antes de validar
+    const normalizedFullName = fullName.trim();
+    const normalizedEmail = email.trim();
+    const normalizedMessage = message.trim();
+    const normalizedPhone = phone ? phone.trim() : '';
+    const normalizedService = service ? service.trim() : '';
+    
+    // Validar y sanitizar inputs
+    const validation = validateInput({ 
+      fullName: normalizedFullName, 
+      email: normalizedEmail, 
+      phone: normalizedPhone, 
+      service: normalizedService, 
+      message: normalizedMessage 
+    });
+    if (!validation.valid) {
+      console.log('[API] Validación fallida:', validation.error);
+      return NextResponse.json(
+        { error: validation.error },
+        { status: 400 }
+      );
+    }
+    
+    // Sanitizar datos para HTML (usar versiones normalizadas)
+    const sanitizedFullName = sanitizeHtml(normalizedFullName);
+    const sanitizedEmail = sanitizeHtml(normalizedEmail);
+    const sanitizedPhone = normalizedPhone ? sanitizeHtml(normalizedPhone) : '';
+    const sanitizedMessage = sanitizeHtml(normalizedMessage);
+    const serviceName = normalizedService ? (SERVICE_NAMES[normalizedService] || 'No especificado') : 'No especificado';
+    
+    // Escapar para atributos HTML (usar versiones normalizadas)
+    const escapedEmail = escapeHtml(normalizedEmail);
+    const escapedPhone = escapeHtml(normalizedPhone || '');
+    
+    // Verificar que las variables de entorno estén configuradas
+    const smtpUser = process.env.SMTP_USER?.trim();
+    // SMTP_PASSWORD (App Password) puede venir con espacios, remover comillas externas
+    const smtpPassword = process.env.SMTP_PASSWORD?.trim().replace(/^"|"$/g, '').trim();
+    const smtpFrom = process.env.SMTP_FROM?.trim() || smtpUser;
+    const smtpTo = process.env.SMTP_TO?.trim();
+    const smtpHost = process.env.SMTP_HOST?.trim() || 'smtp.office365.com';
+    const smtpPort = Number(process.env.SMTP_PORT || 587);
+    
+    if (!smtpUser || !smtpPassword || !smtpFrom || !smtpTo) {
+      console.error('[API] ❌ Variables de entorno faltantes o vacías');
+      return NextResponse.json(
+        { error: 'Error de configuración del servidor. Por favor, contacta al administrador.' },
+        { status: 500 }
+      );
+    }
+    
+    console.log('[API] Configurando SMTP Office365 con usuario:', smtpUser);
+    console.log('[API] Host:', smtpHost, '- Puerto:', smtpPort);
+    console.log('[API] Longitud de contraseña de aplicación:', smtpPassword.length, 'caracteres');
+    
+    // Configurar transporter SMTP para Gmail con TLS seguro
     const transporter = nodemailer.createTransport({
-      host: 'smtp.office365.com',           // Servidor SMTP oficial de Microsoft 365
-      port: 587,                            // Puerto estándar para STARTTLS
-      secure: false,                        // false para 587, true para 465 (SSL)
+      host: smtpHost,
+      port: smtpPort,
+      secure: false, // false para 587 (STARTTLS)
       auth: {
-        user: process.env.EMAIL_USER,       // Usuario SMTP desde variables de entorno
-        pass: process.env.EMAIL_PASS,       // Password desde variables de entorno
+        user: smtpUser,
+        pass: smtpPassword,
       },
       tls: {
-        ciphers: 'SSLv3'                   // Configuración para compatibilidad con Outlook
-      }
+        minVersion: 'TLSv1.2', // ✅ TLS 1.2 mínimo
+        ciphers: 'HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA',
+        rejectUnauthorized: true, // ✅ Verificar certificado
+      },
+      // Opciones adicionales para Office 365
+      requireTLS: true,
+      connectionTimeout: 10000, // 10 segundos
+      greetingTimeout: 10000,
     });
-
-    // ======================================================================
-    // VERIFICACIÓN DE CONEXIÓN - Test de conectividad SMTP
-    // ======================================================================
     
-    /**
-     * Verificación de la conexión SMTP antes de enviar
-     * - transporter.verify() retorna Promise<boolean>
-     * - Lanza excepción si hay problemas de autenticación o conexión
-     * - Es buena práctica verificar antes de intentar enviar
-     */
-    await transporter.verify();
-
-    // ======================================================================
-    // MAPEO DE SERVICIOS - Conversión de códigos a nombres legibles
-    // ======================================================================
-    
-    /**
-     * @description Mapeo del servicio seleccionado a un nombre más legible
-     * @param {string} service - Código del servicio desde el formulario
-     * @returns {string} Nombre legible del servicio o 'No especificado'
-     * 
-     * Los códigos vienen de:
-     * - ContactForm.tsx: select options con values como 'desarrollo', 'eventos', etc.
-     * - Páginas de servicios: /servicios/desarrollo, /servicios/eventos, etc.
-     */
-    const serviceName = service ? SERVICE_NAMES[service] || service : 'No especificado';
-
-    // ======================================================================
-    // CONFIGURACIÓN DEL EMAIL - Construcción del mensaje a enviar
-    // ======================================================================
-    
-    /**
-     * @description Configuración completa del email a enviar
-     * @type {nodemailer.SendMailOptions}
-     * 
-     * @property {string} from - Email remitente (desde .env.local: EMAIL_FROM)
-     * @property {string} to - Email destinatario (desde .env.local: EMAIL_TO)  
-     * @property {string} subject - Asunto dinámico con nombre del contacto
-     * @property {string} html - Plantilla HTML profesional con estilos inline
-     * @property {string} text - Versión plain text para clientes que no soportan HTML
-     * 
-     * Variables de entorno requeridas:
-     * - EMAIL_FROM=web@creativehutcr.com (remitente)
-     * - EMAIL_TO=contacto@creativehutcr.com (destinatario)
-     * 
-     * Nota: Los estilos están inline para máxima compatibilidad con clientes email
-     */
-    const mailOptions = {
-      from: process.env.EMAIL_FROM,          // Remitente desde variables de entorno
-      to: process.env.EMAIL_TO,              // Destinatario desde variables de entorno  
-      subject: `Nuevo contacto desde la web - ${fullName}`,  // Asunto personalizado
+    // Verificar conexión SMTP (opcional en desarrollo, requerido en producción)
+    try {
+      console.log('[API] Intentando verificar conexión SMTP...');
+      await transporter.verify();
+      console.log('[API] ✅ Conexión SMTP verificada correctamente');
+    } catch (verifyError) {
+      const verifyErrorMsg = verifyError instanceof Error ? verifyError.message : 'Error desconocido';
+      const errorCode = verifyError instanceof Error && 'code' in verifyError 
+        ? (verifyError as Error & { code?: string }).code || 'NO_CODE'
+        : 'NO_CODE';
       
-      /**
-       * PLANTILLA HTML - Diseño profesional responsivo
-       * 
-       * Estructura:
-       * 1. Container principal con fondo gris claro
-       * 2. Header con gradiente morado y título
-       * 3. Sección de información del contacto (tabla)
-       * 4. Sección del mensaje con fondo diferenciado
-       * 5. Footer con timestamp en zona horaria de Costa Rica
-       * 
-       * Características:
-       * - Máximo 600px de ancho para compatibilidad mobile
-       * - Estilos inline para máxima compatibilidad
-       * - Emojis para mejorar legibilidad
-       * - Links clicables para email y teléfono
-       * - Formato de fecha en español (Costa Rica)
-       */
+      console.error('[API] ❌ Error verificando conexión SMTP:');
+      console.error('[API]   - Mensaje:', verifyErrorMsg);
+      console.error('[API]   - Código:', errorCode);
+      console.error('[API]   - Stack:', verifyError instanceof Error ? verifyError.stack?.substring(0, 200) : 'N/A');
+      
+      // En desarrollo, permitir continuar sin verificación (solo para testing)
+      // En producción esto debería fallar
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('[API] ⚠️  Modo desarrollo: Continuando sin verificación SMTP (esto puede fallar al enviar)');
+        // No retornar error, continuar con el envío
+      } else {
+        // En producción, retornar error
+        return NextResponse.json(
+          { error: 'Error de configuración del servidor de email. Por favor, contacta al administrador.' },
+          { status: 500 }
+        );
+      }
+    }
+    
+    // Construir email con datos sanitizados
+    const mailOptions = {
+      from: `"Creative Hut" <${smtpFrom}>`,
+      replyTo: sanitizedEmail || smtpFrom,
+      to: smtpTo,
+      subject: `Nuevo contacto desde la web - ${sanitizedFullName}`,
+      
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
           <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
@@ -304,16 +498,16 @@ export async function POST(request: NextRequest) {
               <table style="width: 100%; border-collapse: collapse;">
                 <tr>
                   <td style="padding: 8px 0; font-weight: bold; color: #555; width: 120px;">👤 Nombre:</td>
-                  <td style="padding: 8px 0; color: #333;">${fullName}</td>
+                  <td style="padding: 8px 0; color: #333;">${sanitizedFullName}</td>
                 </tr>
                 <tr>
                   <td style="padding: 8px 0; font-weight: bold; color: #555;">📧 Email:</td>
-                  <td style="padding: 8px 0; color: #333;"><a href="mailto:${email}" style="color: #667eea; text-decoration: none;">${email}</a></td>
+                  <td style="padding: 8px 0; color: #333;"><a href="mailto:${escapedEmail}" style="color: #667eea; text-decoration: none;">${sanitizedEmail}</a></td>
                 </tr>
-                ${phone ? `
+                ${sanitizedPhone ? `
                 <tr>
                   <td style="padding: 8px 0; font-weight: bold; color: #555;">📱 Teléfono:</td>
-                  <td style="padding: 8px 0; color: #333;"><a href="tel:${phone}" style="color: #667eea; text-decoration: none;">${phone}</a></td>
+                  <td style="padding: 8px 0; color: #333;"><a href="tel:${escapedPhone}" style="color: #667eea; text-decoration: none;">${sanitizedPhone}</a></td>
                 </tr>
                 ` : ''}
                 <tr>
@@ -329,9 +523,7 @@ export async function POST(request: NextRequest) {
             
             <div style="margin-bottom: 25px; padding: 15px; background-color: #f8f9fa; border-left: 4px solid #28a745; border-radius: 4px;">
               <h3 style="margin: 0 0 15px 0; color: #333; font-size: 18px;">💬 Mensaje</h3>
-              <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #e9ecef; color: #333; line-height: 1.6;">
-                ${message.replace(/\n/g, '<br>')}
-              </div>
+              <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #e9ecef; color: #333; line-height: 1.6; white-space: pre-wrap;">${sanitizedMessage.replace(/\n/g, '<br>')}</div>
             </div>
             
             <div style="padding: 15px; background-color: #e8f4fd; border-radius: 6px; text-align: center; border: 1px solid #bee5eb;">
@@ -354,28 +546,18 @@ export async function POST(request: NextRequest) {
         </div>
       `,
       
-      /**
-       * VERSIÓN TEXTO PLANO - Fallback para clientes que no soportan HTML
-       * 
-       * @description Versión simplificada del email en texto plano
-       * - Misma información que la versión HTML
-       * - Formato limpio y legible
-       * - Fecha formateada para Costa Rica
-       * - Incluye toda la información del contacto
-       * - Se usa automáticamente si el cliente no soporta HTML
-       */
       text: `
         Nuevo contacto desde Creative Hut
         
         Información del contacto:
-        - Nombre: ${fullName}
-        - Email: ${email}
-        ${phone ? `- Teléfono: ${phone}` : ''}
+        - Nombre: ${sanitizedFullName}
+        - Email: ${sanitizedEmail}
+        ${sanitizedPhone ? `- Teléfono: ${sanitizedPhone}` : ''}
         - Servicio de interés: ${serviceName}
         - Consentimiento: Acepta ser contactado para fines comerciales y de seguimiento
         
         Mensaje:
-        ${message}
+        ${sanitizedMessage}
         
         Fecha: ${new Date().toLocaleString('es-CR', { 
           timeZone: 'America/Costa_Rica',
@@ -387,97 +569,68 @@ export async function POST(request: NextRequest) {
         })} (Hora de Costa Rica)
       `
     };
-
-    // ======================================================================
-    // ENVÍO DEL EMAIL - Ejecución del transporter
-    // ======================================================================
     
-    /**
-     * Envío del email usando el transporter configurado
-     * - transporter.sendMail() retorna Promise con info del envío
-     * - Si falla, lanza excepción que es capturada por el catch
-     * - Si es exitoso, continúa al return de éxito
-     */
-    await transporter.sendMail(mailOptions);
-
-    // ======================================================================
-    // RESPUESTA DE ÉXITO - Return exitoso al cliente
-    // ======================================================================
+    // Enviar email
+    try {
+      await transporter.sendMail(mailOptions);
+    } catch (sendError) {
+      const sendErrorMsg = sendError instanceof Error ? sendError.message : 'Error desconocido';
+      console.error('[API] Error enviando email:', sendErrorMsg);
+      // Log del error
+      logEmailAttempt(clientIp, normalizedEmail, false, sendError);
+      
+      // Manejar errores específicos de nodemailer
+      if (sendErrorMsg.includes('Invalid login') || sendErrorMsg.includes('authentication')) {
+        return NextResponse.json(
+          { error: 'Error de configuración del servidor de email. Por favor, contacta al administrador.' },
+          { status: 500 }
+        );
+      }
+      
+      if (sendErrorMsg.includes('timeout') || sendErrorMsg.includes('ECONNREFUSED')) {
+        return NextResponse.json(
+          { error: 'Error de conexión con el servidor de email. Por favor, intenta más tarde.' },
+          { status: 503 }
+        );
+      }
+      
+      // Error genérico de envío
+      return NextResponse.json(
+        { error: 'Error al enviar el email. Por favor, intenta más tarde.' },
+        { status: 500 }
+      );
+    }
     
-    /**
-     * Respuesta exitosa al cliente (frontend)
-     * - Status 200: OK
-     * - JSON con mensaje de confirmación
-     * - Es capturada por ContactForm.tsx en el .then()
-     */
+    // Log exitoso (usar email normalizado)
+    logEmailAttempt(clientIp, normalizedEmail, true);
+    
+    const duration = Date.now() - startTime;
+    console.log(`[${new Date().toISOString()}] Request procesado en ${duration}ms`);
+    
     return NextResponse.json(
       { message: 'Email enviado exitosamente' },
       { status: 200 }
     );
-
-  // ========================================================================
-  // MANEJO DE ERRORES - Captura de excepciones
-  // ========================================================================
-  
-  } catch (error) {
-    // ======================================================================
-    // LOGGING DE ERRORES - Registro para debugging
-    // ======================================================================
     
-    /**
-     * Log del error para debugging
-     * - Se registra en la consola del servidor
-     * - Útil para debugging en desarrollo y producción
-     * - El error puede venir de: JSON parsing, SMTP, validación, etc.
-     */
-    console.error('Error enviando email:', error);
+  } catch (error: unknown) {
+    // Log seguro del error
+    const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+    console.error('[API] Error general:', errorMessage);
+    logEmailAttempt(clientIp, 'unknown', false, error);
     
-    // ======================================================================
-    // RESPUESTA DE ERROR - Return de error al cliente
-    // ======================================================================
+    // Si es error de configuración (variables de entorno), retornar 500 sin detalles
+    if (errorMessage.includes('Variables de entorno') || errorMessage.includes('EMAIL_') || errorMessage.includes('GMAIL_')) {
+      console.error('[API] Error de configuración:', errorMessage);
+      return NextResponse.json(
+        { error: 'Error de configuración del servidor. Por favor, contacta al administrador.' },
+        { status: 500 }
+      );
+    }
     
-    /**
-     * Respuesta de error al cliente (frontend)
-     * - Status 500: Internal Server Error
-     * - JSON con mensaje genérico (no expone detalles internos)
-     * - Es capturada por ContactForm.tsx en el .catch()
-     */
+    // Error genérico para el cliente
     return NextResponse.json(
-      { error: 'Error interno del servidor al enviar el email' },
+      { error: 'Error interno del servidor al procesar la solicitud. Por favor, intenta más tarde.' },
       { status: 500 }
     );
   }
 }
-
-// ============================================================================
-// DOCUMENTACIÓN ADICIONAL
-// ============================================================================
-
-/**
- * @summary FLUJO COMPLETO DEL ENDPOINT
- * 
- * 1. CLIENTE → Envía POST a /api/send-email con datos del formulario
- * 2. SERVIDOR → Extrae y valida datos del request
- * 3. SERVIDOR → Configura conexión SMTP con Microsoft 365
- * 4. SERVIDOR → Verifica conectividad SMTP
- * 5. SERVIDOR → Construye email HTML y texto
- * 6. SERVIDOR → Envía email via SMTP
- * 7. SERVIDOR → Retorna respuesta de éxito/error al cliente
- * 8. CLIENTE → Procesa respuesta y muestra mensaje al usuario
- * 
- * @usage ARCHIVOS QUE USAN ESTE ENDPOINT
- * - /src/components/ContactForm.tsx (formulario principal)
- * - Páginas de servicios que incluyen ContactForm
- * 
- * @environment VARIABLES DE ENTORNO REQUERIDAS
- * - EMAIL_USER: Usuario SMTP (ej: web@creativehutcr.com)
- * - EMAIL_PASS: Password de aplicación Microsoft 365
- * - EMAIL_FROM: Email remitente para el campo "from"
- * - EMAIL_TO: Email destinatario donde llegan los mensajes
- * 
- * @security CONSIDERACIONES DE SEGURIDAD
- * - Rate limiting: Implementar en nginx/cloudflare
- * - Validación: Expandir validaciones de email y datos
- * - Sanitización: Los datos se escapan automáticamente en HTML
- * - Logs: No registrar información sensible (passwords, etc.)
- */

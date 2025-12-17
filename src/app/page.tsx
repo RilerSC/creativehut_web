@@ -894,29 +894,15 @@ export default function Home() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 max-w-6xl mx-auto">
             <div ref={socio1Ref} className="text-center p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 cursor-pointer transition-all duration-200">
-              <div className="adn-card-icon w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 overflow-hidden">
-                <svg className="w-14 h-14 sm:w-16 sm:h-16 text-white" fill="currentColor" viewBox="0 0 100 100">
-                  <defs>
-                    <clipPath id="circle1">
-                      <circle cx="50" cy="50" r="50"/>
-                    </clipPath>
-                  </defs>
-                  <g clipPath="url(#circle1)">
-                    {/* Head */}
-                    <ellipse cx="50" cy="35" rx="12" ry="15" fill="currentColor"/>
-                    {/* Neck */}
-                    <rect x="47" y="48" width="6" height="8" fill="currentColor"/>
-                    {/* Suit jacket */}
-                    <path d="M25 60 L35 58 L42 56 L50 55 L58 56 L65 58 L75 60 L75 100 L25 100 Z" fill="currentColor"/>
-                    {/* Shirt collar */}
-                    <path d="M42 56 L50 58 L58 56 L54 62 L50 64 L46 62 Z" fill="white" opacity="0.9"/>
-                    {/* Tie */}
-                    <path d="M48 58 L50 64 L52 58 L51 80 L50 82 L49 80 Z" fill="currentColor" opacity="0.7"/>
-                    {/* Shoulders */}
-                    <ellipse cx="38" cy="58" rx="8" ry="12" fill="currentColor"/>
-                    <ellipse cx="62" cy="58" rx="8" ry="12" fill="currentColor"/>
-                  </g>
-                </svg>
+              <div className="adn-card-icon w-32 h-32 sm:w-40 sm:h-40 rounded-full flex items-center justify-center mx-auto mb-4 overflow-hidden relative">
+                <Image
+                  src="/team/Jonathan.png"
+                  alt="Jonathan Jácamo"
+                  width={160}
+                  height={160}
+                  className="w-full h-full object-contain rounded-full scale-110"
+                  priority
+                />
               </div>
               <h4 className="adn-card-title text-base sm:text-lg font-bold text-white mb-2">Jonathan Jácamo</h4>
               <p className="text-sm text-purple-300 font-medium mb-1">Dirección Creativa</p>
@@ -924,29 +910,15 @@ export default function Home() {
             </div>
 
             <div ref={socio2Ref} className="text-center p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 cursor-pointer transition-all duration-200">
-              <div className="adn-card-icon w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-pink-500 to-rose-600 rounded-full flex items-center justify-center mx-auto mb-4 overflow-hidden">
-                <svg className="w-14 h-14 sm:w-16 sm:h-16 text-white" fill="currentColor" viewBox="0 0 100 100">
-                  <defs>
-                    <clipPath id="circle2">
-                      <circle cx="50" cy="50" r="50"/>
-                    </clipPath>
-                  </defs>
-                  <g clipPath="url(#circle2)">
-                    {/* Head */}
-                    <ellipse cx="50" cy="35" rx="12" ry="15" fill="currentColor"/>
-                    {/* Hair */}
-                    <path d="M35 25 Q50 20 65 25 Q65 35 62 38 Q50 32 38 38 Q35 35 35 25" fill="currentColor"/>
-                    {/* Neck */}
-                    <rect x="47" y="48" width="6" height="8" fill="currentColor"/>
-                    {/* Blouse/Blazer */}
-                    <path d="M25 60 L35 58 L42 56 L50 55 L58 56 L65 58 L75 60 L75 100 L25 100 Z" fill="currentColor"/>
-                    {/* Collar */}
-                    <path d="M42 56 L50 62 L58 56 L55 65 L50 66 L45 65 Z" fill="white" opacity="0.9"/>
-                    {/* Shoulders */}
-                    <ellipse cx="38" cy="58" rx="8" ry="12" fill="currentColor"/>
-                    <ellipse cx="62" cy="58" rx="8" ry="12" fill="currentColor"/>
-                  </g>
-                </svg>
+              <div className="adn-card-icon w-32 h-32 sm:w-40 sm:h-40 rounded-full flex items-center justify-center mx-auto mb-4 overflow-hidden relative">
+                <Image
+                  src="/team/Brittney.png"
+                  alt="Brittney Rojas"
+                  width={160}
+                  height={160}
+                  className="w-full h-full object-contain rounded-full scale-110"
+                  priority
+                />
               </div>
               <h4 className="adn-card-title text-base sm:text-lg font-bold text-white mb-2">Brittney Rojas</h4>
               <p className="text-sm text-pink-300 font-medium mb-1">Comunicación</p>
@@ -954,29 +926,15 @@ export default function Home() {
             </div>
 
             <div ref={socio3Ref} className="text-center p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 cursor-pointer transition-all duration-200">
-              <div className="adn-card-icon w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center mx-auto mb-4 overflow-hidden">
-                <svg className="w-14 h-14 sm:w-16 sm:h-16 text-white" fill="currentColor" viewBox="0 0 100 100">
-                  <defs>
-                    <clipPath id="circle3">
-                      <circle cx="50" cy="50" r="50"/>
-                    </clipPath>
-                  </defs>
-                  <g clipPath="url(#circle3)">
-                    {/* Head */}
-                    <ellipse cx="50" cy="35" rx="12" ry="15" fill="currentColor"/>
-                    {/* Hair */}
-                    <path d="M35 22 Q50 18 65 22 Q68 30 65 38 Q50 35 35 38 Q32 30 35 22" fill="currentColor"/>
-                    {/* Neck */}
-                    <rect x="47" y="48" width="6" height="8" fill="currentColor"/>
-                    {/* Professional outfit */}
-                    <path d="M25 60 L35 58 L42 56 L50 55 L58 56 L65 58 L75 60 L75 100 L25 100 Z" fill="currentColor"/>
-                    {/* Professional collar */}
-                    <path d="M42 56 L50 60 L58 56 L56 64 L50 65 L44 64 Z" fill="white" opacity="0.9"/>
-                    {/* Shoulders */}
-                    <ellipse cx="38" cy="58" rx="8" ry="12" fill="currentColor"/>
-                    <ellipse cx="62" cy="58" rx="8" ry="12" fill="currentColor"/>
-                  </g>
-                </svg>
+              <div className="adn-card-icon w-32 h-32 sm:w-40 sm:h-40 rounded-full flex items-center justify-center mx-auto mb-4 overflow-hidden relative">
+                <Image
+                  src="/team/Vero.png"
+                  alt="Verónica Chavarría"
+                  width={160}
+                  height={160}
+                  className="w-full h-full object-contain rounded-full scale-110"
+                  priority
+                />
               </div>
               <h4 className="adn-card-title text-base sm:text-lg font-bold text-white mb-2">Verónica Chavarría</h4>
               <p className="text-sm text-emerald-300 font-medium mb-1">Dirección Administrativa</p>
@@ -984,30 +942,15 @@ export default function Home() {
             </div>
 
             <div ref={socio4Ref} className="text-center p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 cursor-pointer transition-all duration-200">
-              <div className="adn-card-icon w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-orange-500 to-amber-600 rounded-full flex items-center justify-center mx-auto mb-4 overflow-hidden">
-                <svg className="w-14 h-14 sm:w-16 sm:h-16 text-white" fill="currentColor" viewBox="0 0 100 100">
-                  <defs>
-                    <clipPath id="circle4">
-                      <circle cx="50" cy="50" r="50"/>
-                    </clipPath>
-                  </defs>
-                  <g clipPath="url(#circle4)">
-                    {/* Head */}
-                    <ellipse cx="50" cy="35" rx="12" ry="15" fill="currentColor"/>
-                    {/* Hair */}
-                    <path d="M38 25 Q50 22 62 25 Q62 32 60 35 Q50 30 40 35 Q38 32 38 25" fill="currentColor"/>
-                    {/* Neck */}
-                    <rect x="47" y="48" width="6" height="8" fill="currentColor"/>
-                    {/* Business suit */}
-                    <path d="M25 60 L35 58 L42 56 L50 55 L58 56 L65 58 L75 60 L75 100 L25 100 Z" fill="currentColor"/>
-                    {/* Shirt and tie */}
-                    <path d="M42 56 L50 58 L58 56 L54 62 L50 64 L46 62 Z" fill="white" opacity="0.9"/>
-                    <path d="M48 58 L50 64 L52 58 L51 78 L50 80 L49 78 Z" fill="currentColor" opacity="0.7"/>
-                    {/* Shoulders */}
-                    <ellipse cx="38" cy="58" rx="8" ry="12" fill="currentColor"/>
-                    <ellipse cx="62" cy="58" rx="8" ry="12" fill="currentColor"/>
-                  </g>
-                </svg>
+              <div className="adn-card-icon w-32 h-32 sm:w-40 sm:h-40 rounded-full flex items-center justify-center mx-auto mb-4 overflow-hidden relative">
+                <Image
+                  src="/team/Riler.png"
+                  alt="Jose Ríler Solórzano"
+                  width={160}
+                  height={160}
+                  className="w-full h-full object-contain rounded-full scale-110"
+                  priority
+                />
               </div>
               <h4 className="adn-card-title text-base sm:text-lg font-bold text-white mb-2">Jose Ríler Solórzano</h4>
               <p className="text-sm text-orange-300 font-medium mb-1">Análisis de Negocio</p>
@@ -1169,33 +1112,57 @@ export default function Home() {
               const clientsData = [
                 {
                   id: 1,
-                  name: "Cliente 1",
-                  logo: "/logosClientes/cliente1.png",
-                  description: "Soluciones innovadoras"
+                  name: "Custom Culinary",
+                  logo: "/logosClientes/CUSTOM CULINARY-01.png",
+                  description: "Soluciones gastronómicas"
                 },
                 {
                   id: 2,
-                  name: "Cliente 2", 
-                  logo: "/logosClientes/cliente2.png",
+                  name: "Zafran", 
+                  logo: "/logosClientes/Zafran-01.png",
                   description: "Transformación digital"
                 },
                 {
                   id: 3,
-                  name: "Cliente 3",
-                  logo: "/logosClientes/cliente3.png", 
+                  name: "Griffith",
+                  logo: "/logosClientes/LOGO-GRIFFITH-COLOR.png", 
                   description: "Experiencias únicas"
                 },
                 {
                   id: 4,
-                  name: "Cliente 4",
-                  logo: "/logosClientes/cliente4.png",
+                  name: "Rojas y Jiménez",
+                  logo: "/logosClientes/LOGO-ROJAS Y JIMENEZ-COLOR.png",
                   description: "Crecimiento sostenible"
                 },
                 {
                   id: 5,
-                  name: "Cliente 5",
-                  logo: "/logosClientes/cliente5.png",
+                  name: "Oikoumene",
+                  logo: "/logosClientes/LOGO-OIKOUMENE-COLOR.png",
                   description: "Innovación constante"
+                },
+                {
+                  id: 6,
+                  name: "JCoop",
+                  logo: "/logosClientes/LOGO-JCOOP-COLOR.png",
+                  description: "Cooperativismo moderno"
+                },
+                {
+                  id: 7,
+                  name: "CCC CA",
+                  logo: "/logosClientes/LOGO-CCC CA-COLOR.png",
+                  description: "Excelencia empresarial"
+                },
+                {
+                  id: 8,
+                  name: "Cenecoop",
+                  logo: "/logosClientes/logos cenecoop COLOR.png",
+                  description: "Desarrollo cooperativo"
+                },
+                {
+                  id: 9,
+                  name: "Fundepos",
+                  logo: "/logosClientes/LOGO-FUNDEPOS-COLOR.png",
+                  description: "Fomento al desarrollo"
                 }
               ];
 
@@ -1224,32 +1191,38 @@ export default function Home() {
                   }}
                   className="clients-swiper"
                 >
-                  {clientsData.map((client) => (
-                    <SwiperSlide key={client.id}>
-                      <div className="bg-white/10 backdrop-blur-sm p-6 sm:p-8 rounded-2xl text-center border border-white/20 hover:bg-white/20 transition-all duration-200">
-                        <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 p-3 overflow-hidden">
-                          <Image 
-                            src={client.logo} 
-                            alt={`Logo ${client.name}`}
-                            width={96}
-                            height={96}
-                            className="w-full h-full object-contain filter brightness-90 hover:brightness-100 transition-all duration-200"
-                            onError={(e) => {
-                              // Fallback si la imagen no carga
-                              const target = e.target as HTMLImageElement;
-                              target.style.display = 'none';
-                              const fallback = document.createElement('span');
-                              fallback.className = 'text-gray-800 font-bold text-lg';
-                              fallback.textContent = client.name.charAt(0);
-                              target.parentElement?.appendChild(fallback);
-                            }}
-                          />
+                  {clientsData.map((client) => {
+                    // Codificar la ruta para manejar espacios y caracteres especiales
+                    const encodedLogo = client.logo
+                      .split('/')
+                      .map((part, index) => (index === 0 ? part : encodeURIComponent(part)))
+                      .join('/');
+                    
+                    return (
+                      <SwiperSlide key={client.id}>
+                        <div className="bg-white/10 backdrop-blur-sm p-6 sm:p-8 rounded-2xl text-center border border-white/20 hover:bg-white/20 transition-all duration-200">
+                          <div className="w-32 h-32 sm:w-40 sm:h-40 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 p-4 sm:p-5 overflow-hidden">
+                            <img 
+                              src={encodedLogo} 
+                              alt={`Logo ${client.name}`}
+                              className="w-full h-full object-contain filter brightness-90 hover:brightness-100 transition-all duration-200"
+                              onError={(e) => {
+                                // Fallback si la imagen no carga
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = 'none';
+                                const fallback = document.createElement('span');
+                                fallback.className = 'text-gray-800 font-bold text-lg';
+                                fallback.textContent = client.name.charAt(0);
+                                target.parentElement?.appendChild(fallback);
+                              }}
+                            />
+                          </div>
+                          <h3 className="text-white font-bold text-lg mb-1">{client.name}</h3>
+                          <p className="text-gray-400 text-sm">{client.description}</p>
                         </div>
-                        <h3 className="text-white font-bold text-lg mb-1">{client.name}</h3>
-                        <p className="text-gray-400 text-sm">{client.description}</p>
-                      </div>
-                    </SwiperSlide>
-                  ))}
+                      </SwiperSlide>
+                    );
+                  })}
                 </Swiper>
               );
             })()}
