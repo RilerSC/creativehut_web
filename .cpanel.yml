@@ -1,8 +1,25 @@
 ---
+# Deployment configuration for Next.js application
+# IMPORTANTE: Actualiza DEPLOYPATH con la ruta exacta de tu Application Root
 deployment:
   tasks:
     - export NODE_ENV=production
-    - /usr/local/bin/npm ci
+    - export DEPLOYPATH=/home/txidnjaw/prueba.creativehutcr.com
+    - export REPOPATH=/home/txidnjaw/repositories/creativehut_web
+    # Copiar archivos del repositorio al Application Root (excluyendo .git y node_modules)
+    - /bin/cp -R $REPOPATH/src $DEPLOYPATH/ 2>/dev/null || true
+    - /bin/cp -R $REPOPATH/public $DEPLOYPATH/ 2>/dev/null || true
+    - /bin/cp $REPOPATH/package.json $DEPLOYPATH/
+    - /bin/cp $REPOPATH/package-lock.json $DEPLOYPATH/
+    - /bin/cp $REPOPATH/next.config.ts $DEPLOYPATH/
+    - /bin/cp $REPOPATH/tsconfig.json $DEPLOYPATH/
+    - /bin/cp $REPOPATH/tailwind.config.ts $DEPLOYPATH/
+    - /bin/cp $REPOPATH/postcss.config.mjs $DEPLOYPATH/
+    - /bin/cp $REPOPATH/eslint.config.mjs $DEPLOYPATH/
+    # Instalar dependencias y hacer build
+    - cd $DEPLOYPATH
+    - /usr/local/bin/npm ci --production=false
     - /usr/local/bin/npm run build
+    # Reiniciar la aplicación Node.js
     - /bin/touch tmp/restart.txt
 
