@@ -1,5 +1,7 @@
 # Envío de correos por SMTP con Microsoft 365 (Office 365) usando **App Password** (STARTTLS 587)
 
+> Guía genérica. En este repositorio el contrato es `.env.example`: `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM` y `SMTP_TO` (no `SMTP_TO_EMAIL`). El módulo del proyecto es `src/server/email/contact-mailer.ts`.
+
 Este documento explica cómo implementar envío de correos vía SMTP con Microsoft 365 de forma **portable** (Python, Next.js/Node, PHP, etc.).  
 El patrón es siempre el mismo: **conectar a `smtp.office365.com:587` sin TLS inicial y luego hacer `STARTTLS`**, autenticarse y enviar.
 

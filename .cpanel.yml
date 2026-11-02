@@ -1,14 +1,9 @@
 ---
-# Deployment configuration for Next.js application
-# Este archivo asume que el repositorio Git está clonado directamente en el Application Root
-# Si el repo está en la misma carpeta de la app, solo necesitamos instalar y build
+# El servidor cPanel no compila este proyecto.
+# El Node del hosting (16 por defecto) no puede construir Next.js 15.
+# El build se hace en local o en GitHub Actions (workflow "Export estático").
+# A public_html se sube solo el contenido de out/, nunca el repositorio.
+# Pasos: README, sección "Publicar en cPanel".
 deployment:
   tasks:
-    - export NODE_ENV=production
-    # Instalar dependencias (sin --production para incluir devDependencies necesarias para build)
-    - /usr/local/bin/npm ci
-    # Hacer build de producción
-    - /usr/local/bin/npm run build
-    # Reiniciar la aplicación Node.js (Passenger detecta el cambio y reinicia)
-    - /bin/touch tmp/restart.txt
-
+    - /bin/echo "creativehut_web: no hay npm ci ni npm run build en el servidor. Publica el contenido de out/ en public_html."

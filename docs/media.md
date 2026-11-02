@@ -1,5 +1,7 @@
 # 📸 Media Assets - Creative Hut
 
+Los archivos siguen en `public/media/`. Esta nota está fuera de `public/` para que el export estático no la copie a `out/`.
+
 Esta carpeta contiene todo el contenido multimedia de Creative Hut: fotografías, videos y recursos audiovisuales para el sitio web, blog y redes sociales.
 
 ## 📁 Estructura de Carpetas

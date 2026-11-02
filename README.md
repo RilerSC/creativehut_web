@@ -12,11 +12,9 @@ Sitio web corporativo moderno para Creative Hut - Agencia de marketing digital y
 - **Eventos**: Organización y producción de eventos corporativos
 - **Desarrollo**: Desarrollo web y aplicaciones personalizadas
 
-### 📧 Sistema de Email
-- Integración con Microsoft 365 SMTP
-- Formulario de contacto funcional con validación
-- Templates HTML profesionales
-- Confirmación de envío automática
+### 📧 Contacto
+- En el sitio estático, el formulario abre el correo del visitante (`mailto:hola@creativehutcr.com`) con el mensaje ya escrito. No confirma la entrega.
+- El envío SMTP con Nodemailer queda en `src/server/email/contact-mailer.ts` y solo funciona cuando haya un servidor Node (Vercel).
 
 ### 🎨 UI/UX
 - Diseño responsive mobile-first
@@ -33,17 +31,18 @@ Sitio web corporativo moderno para Creative Hut - Agencia de marketing digital y
 
 ## 🛠️ Stack Tecnológico
 
-- **Framework**: Next.js 15.3.5 con App Router
-- **Frontend**: React 19 + TypeScript
+- **Framework**: Next.js 15.5.28 con App Router, export estático (`out/`)
+- **Frontend**: React 19.3.1 + TypeScript
 - **Styling**: Tailwind CSS v4
-- **Email**: Nodemailer + Microsoft 365 SMTP
-- **Deployment**: Static export compatible
+- **Animación**: GSAP, Lenis y Swiper, empaquetados en el propio sitio
+- **Email en servidor**: Nodemailer 10, inactivo en cPanel
+- **Node**: 24.22.1 o superior (`.nvmrc`)
 
 ## 🚀 Desarrollo Local
 
 ### Prerrequisitos
-- Node.js 18+ 
-- npm o yarn
+- Node.js 24.22.1 o superior (`nvm use` lee `.nvmrc`)
+- npm
 
 ### Instalación
 ```bash
@@ -54,22 +53,14 @@ cd creativehut_web
 # Instalar dependencias
 npm install
 
-# Configurar variables de entorno
+# Plantilla de variables. El sitio estático no las necesita para publicarse.
 cp .env.example .env.local
-# Editar .env.local con tus credenciales de Microsoft 365
 
 # Ejecutar en desarrollo
 npm run dev
 ```
 
-### Configuración de Email
-Crear `.env.local` con:
-```env
-EMAIL_USER=tu_email@creativehutcr.com
-EMAIL_PASS=tu_password_de_aplicacion
-EMAIL_HOST=smtp.office365.com
-EMAIL_PORT=587
-```
+El esquema de variables es solo el de `.env.example` (`SMTP_*` y `NEXT_PUBLIC_*`). No uses `EMAIL_*` ni `GMAIL_*`.
 
 ## 📦 Scripts Disponibles
 
@@ -84,12 +75,9 @@ npm run lint     # Linting con ESLint
 
 ```
 src/
-├── app/                    # App Router (Next.js 13+)
-│   ├── api/               # API Routes
-│   │   └── send-email/    # Endpoint de envío de emails
+├── app/                    # App Router. Sin rutas /api en el export estático.
 │   ├── servicios/         # Páginas de servicios
 │   │   ├── produccion-digital/
-│   │   ├── publicidad-digital/
 │   │   ├── marketing-digital/
 │   │   ├── eventos/
 │   │   └── desarrollo/
@@ -100,29 +88,35 @@ src/
 │   ├── ContactForm.tsx    # Formulario de contacto
 │   ├── Navigation.tsx     # Navegación principal
 │   └── AnimationProvider.tsx
-└── hooks/                 # Custom hooks
-    └── useAnimations.ts
+├── hooks/
+│   └── useAnimations.ts
+└── server/email/           # Nodemailer. No se publica en out/.
+    └── contact-mailer.ts
 ```
 
-## 🌐 Deploy
+## Publicar en cPanel
 
-### Build de Producción
-```bash
-npm run build
-```
+El servidor no compila. Node 16, el predeterminado del hosting, no sirve para Next.js 15. `.cpanel.yml` no ejecuta `npm ci` ni `npm run build`.
 
-### Hosting Estático
-El proyecto está configurado para export estático en `next.config.ts`:
-```typescript
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  output: 'export',
-  trailingSlash: true,
-  images: {
-    unoptimized: true
-  }
-}
-```
+1. En tu máquina, con Node 24.22.1 o superior: `npm ci` y `npm run build`.
+2. El resultado es la carpeta `out/`. Incluye `.htaccess`.
+3. En cPanel, desactiva el despliegue Git que copia el repositorio dentro de `public_html`. Si el repo queda en la raíz web, se publican el código, `.git` y los Markdown internos.
+4. Abre el Administrador de archivos (o FTP) en `public_html`.
+5. Borra el sitio anterior que esté en esa carpeta. No borres otras carpetas del dominio que no sean este sitio, ni `/.well-known/` si el certificado la usa.
+6. Sube **el contenido** de `out/` (los archivos de dentro, no la carpeta `out` como nivel extra) a `public_html`.
+7. Confirma que `public_html/.htaccess` e `index.html` quedaron en la raíz del dominio.
+8. Abre `https://creativehutcr.com/` y una página de servicio. El formulario debe abrir el correo del visitante, no llamar a `/api/send-email`.
+
+Alternativa con GitHub Actions: al fusionar en `main`, el workflow "Export estático" genera el artefacto `creativehut-out`. Descárgalo y súbelo igual, el contenido dentro de `public_html`. El workflow no tiene credenciales de FTP.
+
+## Fase Vercel con Node
+
+Cuando el sitio deje el hosting estático:
+
+1. Volver a crear `src/app/api/send-email/route.ts` que llame a `handleContactEmailPost` (el comentario del módulo indica el archivo). Quitar `output: 'export'` si las páginas deben ejecutarse en el servidor.
+2. En el proyecto de Vercel, cargar `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM` y `SMTP_TO` como variables de Production. El formulario del navegador tiene que volver a hacer `POST /api/send-email` en lugar de `mailto`.
+3. Apuntar el dominio `creativehutcr.com` al proyecto de Vercel y cambiar los DNS en el registrador a los que indique Vercel. El `.htaccess` de Apache deja de aplicar; las cabeceras pasan a `next.config` o a la configuración del proyecto.
+4. `NEXT_PUBLIC_YOUTUBE_API_KEY`, si se usa, sigue siendo pública en el navegador. No pongas la contraseña SMTP en una variable `NEXT_PUBLIC_`.
 
 ## 📞 Contacto
 

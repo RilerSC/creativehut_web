@@ -1,5 +1,7 @@
 # 🎨 Brand Assets - Creative Hut
 
+Los archivos siguen en `public/brand/`. Esta nota está fuera de `public/` para que el export estático no la copie a `out/`.
+
 Esta carpeta contiene todos los recursos visuales de la marca Creative Hut.
 
 ## 📁 Estructura de Carpetas

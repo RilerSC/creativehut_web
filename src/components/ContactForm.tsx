@@ -19,8 +19,10 @@
 
 /**
  * @fileoverview Componente de formulario de contacto profesional y reutilizable
- * @description Implementa un formulario completo de contacto con validación,
- * integración con API de email, manejo de estados y UX optimizada.
+ * @description Formulario de contacto. En el export estático el envío abre
+ * el cliente de correo del visitante (mailto). No llama a /api/send-email:
+ * esa ruta no existe en un hosting sin Node. El SMTP con Nodemailer está en
+ * src/server/email/contact-mailer.ts para cuando el sitio corra en Vercel.
  * 
  * @module ContactForm
  * @version 1.0.0
@@ -29,14 +31,14 @@
  * @since 2025-07-28
  * 
  * @requires react - Hooks useState, useRef para manejo de estado
- * @requires /api/send-email - Endpoint personalizado para envío de emails
+ * @requires mailto:hola@creativehutcr.com - Entrega temporal sin servidor
  * 
  * @usage
  * import ContactForm from '@/components/ContactForm';
  * <ContactForm />
  * 
  * @dependencies
- * - API Route: /src/app/api/send-email/route.ts
+ * - Correo de servidor (inactivo aquí): src/server/email/contact-mailer.ts
  * - Usado en: Páginas de servicios, página principal
  * - Estilos: Tailwind CSS v4 (clases utility)
  * 
@@ -97,6 +99,35 @@ interface FormData {
   consent: boolean;
 }
 
+const CONTACT_EMAIL = "hola@creativehutcr.com";
+
+const SERVICE_LABELS: Record<string, string> = {
+  "publicidad-digital": "Publicidad Digital",
+  "marketing-digital": "Marketing Digital",
+  "produccion-digital": "Producción Digital",
+  eventos: "Eventos",
+  desarrollo: "Desarrollo",
+  otro: "Otro",
+};
+
+function buildContactMailto(data: FormData): string {
+  const service = data.service
+    ? SERVICE_LABELS[data.service] || data.service
+    : "No especificado";
+  const lines = [
+    `Nombre: ${data.fullName.trim()}`,
+    `Email: ${data.email.trim()}`,
+    data.phone.trim() ? `Teléfono: ${data.phone.trim()}` : "",
+    `Servicio: ${service}`,
+    "Consentimiento: acepta ser contactado para fines comerciales y de seguimiento",
+    "",
+    "Mensaje:",
+    data.message.trim(),
+  ].filter((line) => line !== "");
+  const subject = `Nuevo contacto desde la web - ${data.fullName.trim()}`;
+  return `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(lines.join("\n"))}`;
+}
+
 export default function ContactForm() {
   // Estado para controlar la visibilidad del formulario de contacto
   const [showContactForm, setShowContactForm] = useState(false);
@@ -111,8 +142,6 @@ export default function ContactForm() {
     consent: false
   });
 
-  // Estado para el envío del formulario
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState('');
   const [submitSuccess, setSubmitSuccess] = useState(false);
   
@@ -133,74 +162,20 @@ export default function ContactForm() {
     }));
   };
 
-  // Manejar envío del formulario
-  const handleSubmit = async (e: React.FormEvent) => {
+  // El hosting estático no puede ejecutar /api/send-email. mailto abre el
+  // correo del visitante con los datos ya escritos. No confirma la entrega.
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.consent) {
       setSubmitMessage('Debes aceptar ser contactado para enviar el formulario.');
       setSubmitSuccess(false);
       return;
     }
 
-    setIsSubmitting(true);
-    setSubmitMessage('');
-
-    try {
-      const response = await fetch('/api/send-email', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (response.ok) {
-        setSubmitMessage('¡Mensaje enviado exitosamente! Te contactaremos pronto. 🎉');
-        setSubmitSuccess(true);
-        // Limpiar formulario
-        setFormData({
-          fullName: '',
-          email: '',
-          phone: '',
-          service: '',
-          message: '',
-          consent: false
-        });
-        // Cerrar formulario después de 3 segundos
-        setTimeout(() => {
-          setShowContactForm(false);
-          setSubmitMessage('');
-        }, 3000);
-      } else {
-        // Intentar extraer el mensaje de error del response
-        let errorMessage = 'Error al enviar el mensaje. Inténtalo de nuevo.';
-        try {
-          const errorData = await response.json();
-          if (errorData && errorData.error) {
-            errorMessage = errorData.error;
-          }
-        } catch (parseError) {
-          // Si no se puede parsear JSON, usar mensaje genérico o status
-          if (response.status === 400) {
-            errorMessage = 'Error de validación. Por favor, verifica que todos los campos estén correctamente completados.';
-          } else if (response.status === 429) {
-            errorMessage = 'Demasiadas solicitudes. Por favor, espera un momento e inténtalo de nuevo.';
-          } else if (response.status >= 500) {
-            errorMessage = 'Error del servidor. Por favor, inténtalo más tarde.';
-          }
-          console.error('Error parseando respuesta:', parseError);
-        }
-        setSubmitMessage(errorMessage);
-        setSubmitSuccess(false);
-      }
-    } catch (error) {
-      console.error('Error en el formulario:', error);
-      setSubmitMessage('Error de conexión. Verifica tu internet e inténtalo de nuevo.');
-      setSubmitSuccess(false);
-    } finally {
-      setIsSubmitting(false);
-    }
+    window.location.href = buildContactMailto(formData);
+    setSubmitMessage('Se abrió tu aplicación de correo con el mensaje listo. Envíalo desde ahí para que llegue a Creative Hut. Si no se abrió, escríbenos a hola@creativehutcr.com.');
+    setSubmitSuccess(true);
   };
 
   return (
@@ -387,7 +362,6 @@ export default function ContactForm() {
                   value={formData.fullName}
                   onChange={handleInputChange}
                   required
-                  disabled={isSubmitting}
                   className="form-control w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                   placeholder="Ej: Juan Pérez González"
                 />
@@ -405,7 +379,6 @@ export default function ContactForm() {
                   value={formData.email}
                   onChange={handleInputChange}
                   required
-                  disabled={isSubmitting}
                   className="form-control w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                   placeholder="Ej: mi_correo@mi_dominio.com"
                 />
@@ -422,7 +395,6 @@ export default function ContactForm() {
                   name="phone"
                   value={formData.phone}
                   onChange={handleInputChange}
-                  disabled={isSubmitting}
                   className="form-control w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                   placeholder="Ej: +506 0000 0000"
                 />
@@ -438,7 +410,6 @@ export default function ContactForm() {
                   name="service"
                   value={formData.service}
                   onChange={handleInputChange}
-                  disabled={isSubmitting}
                   className="form-control w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <option value="">Selecciona un servicio</option>
@@ -462,7 +433,6 @@ export default function ContactForm() {
                   onChange={handleInputChange}
                   required
                   rows={4}
-                  disabled={isSubmitting}
                   className="form-control w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 resize-vertical disabled:opacity-50 disabled:cursor-not-allowed"
                   placeholder="Cuéntanos sobre tu proyecto, ideas, objetivos, presupuesto aproximado, tiempos, etc."
                 />
@@ -478,7 +448,6 @@ export default function ContactForm() {
                     checked={formData.consent}
                     onChange={handleInputChange}
                     required
-                    disabled={isSubmitting}
                     className="form-control mt-1 w-4 h-4 text-purple-600 bg-gray-800 border-gray-600 rounded focus:ring-purple-500 focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   />
                   <label htmlFor="consent" className="form-label text-sm text-gray-300">
@@ -491,29 +460,19 @@ export default function ContactForm() {
               <div className="form-group">
                 <button
                   type="submit"
-                  disabled={isSubmitting || !formData.consent}
+                  disabled={!formData.consent}
                   className="w-full px-8 py-4 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 text-white font-semibold text-lg rounded-lg hover:shadow-xl transform transition-all duration-200 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:scale-100"
                 >
-                  {isSubmitting ? (
-                    <span className="flex items-center justify-center">
-                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Enviando...
-                    </span>
-                  ) : (
-                    <span className="flex items-center justify-center">
-                      <Image 
-                        src="/brand/logos/isotipo-fullcolor.svg" 
-                        alt="Creative Hut - Agencia Digital Costa Rica"
-                        width={26}
-                        height={26}
-                        className="mr-2 opacity-90 group-hover:opacity-100 transition-opacity filter brightness-0 invert"
-                      />
-                      Enviar 🚀
-                    </span>
-                  )}
+                  <span className="flex items-center justify-center">
+                    <Image 
+                      src="/brand/logos/isotipo-fullcolor.svg" 
+                      alt="Creative Hut - Agencia Digital Costa Rica"
+                      width={26}
+                      height={26}
+                      className="mr-2 opacity-90 group-hover:opacity-100 transition-opacity filter brightness-0 invert"
+                    />
+                    Enviar 🚀
+                  </span>
                 </button>
               </div>
             </form>

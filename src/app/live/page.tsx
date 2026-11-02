@@ -214,8 +214,6 @@ export default function LivePage() {
 
   return (
     <>
-  return (
-    <>
       {/* CSS personalizado para ocultar controles de YouTube */}
       <style dangerouslySetInnerHTML={{
         __html: `
