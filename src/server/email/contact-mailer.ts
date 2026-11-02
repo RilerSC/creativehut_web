@@ -18,12 +18,23 @@
  */
 
 /**
- * @fileoverview API Route para envío de emails desde formularios de contacto
- * @description Este archivo implementa un endpoint API que procesa las solicitudes
- * de contacto desde los formularios del sitio web y las envía por email usando
- * Gmail SMTP. Utiliza el sistema de App Router de Next.js 13+.
+ * @fileoverview Envío SMTP del formulario de contacto, aislado del export estático.
+ * @description No es una ruta de App Router. Vive fuera de src/app para que
+ * `next build` con output: 'export' no intente publicarla. El sitio estático
+ * abre un mailto en el navegador. Este módulo se reutiliza cuando haya Node
+ * (Vercel): crear src/app/api/send-email/route.ts con
+ *
+ *   import { NextRequest } from 'next/server';
+ *   import { handleContactEmailPost } from '@/server/email/contact-mailer';
+ *   export const runtime = 'nodejs';
+ *   export function POST(request: NextRequest) {
+ *     return handleContactEmailPost(request);
+ *   }
+ *
+ * Variables: SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_FROM, SMTP_TO.
+ * Esquema único en .env.example. Host por defecto smtp.office365.com:587 (STARTTLS).
  * 
- * @module SendEmailAPI
+ * @module ContactMailer
  * @version 2.0.0 - Versión con mitigaciones de seguridad OWASP
  * @author José Ríler Solórzano Campos <web@creativehutcr.com>
  * @company DEVIT506 - www.devit506.net
@@ -292,7 +303,7 @@ function logEmailAttempt(ip: string, email: string, success: boolean, error?: Er
 // API HANDLER - Función principal del endpoint
 // ============================================================================
 
-export async function POST(request: NextRequest) {
+export async function handleContactEmailPost(request: NextRequest) {
   const startTime = Date.now();
   let clientIp = 'unknown';
   
@@ -428,7 +439,7 @@ export async function POST(request: NextRequest) {
     console.log('[API] Host:', smtpHost, '- Puerto:', smtpPort);
     console.log('[API] Longitud de contraseña de aplicación:', smtpPassword.length, 'caracteres');
     
-    // Configurar transporter SMTP para Gmail con TLS seguro
+    // Office 365: puerto 587, secure false y STARTTLS (requireTLS).
     const transporter = nodemailer.createTransport({
       host: smtpHost,
       port: smtpPort,

@@ -1,17 +1,15 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Configuración para exportación estática
-  output: 'export',
+  // HTML, CSS y JS estáticos en out/. Sin servidor Node en el hosting.
+  output: "export",
   trailingSlash: true,
   images: {
-    unoptimized: true
+    unoptimized: true,
   },
-  // Desactivamos turbopack temporalmente para evitar errores
-  experimental: {
-    turbo: undefined
-  },
-  // Configuración para GSAP y animaciones
+  // Los mapas de producción no deben publicarse en public_html.
+  productionBrowserSourceMaps: false,
+  // El módulo de correo importa nodemailer, que toca fs. El sitio estático no lo empaqueta.
   webpack: (config) => {
     config.resolve.fallback = {
       ...config.resolve.fallback,

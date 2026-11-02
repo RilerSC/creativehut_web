@@ -27,7 +27,7 @@ Esta guía te explica cómo conectar datos reales de YouTube (viewers y chat) en
 
 1. **Crea el archivo `.env.local`** en la raíz del proyecto:
 ```bash
-cp .env.local.example .env.local
+cp .env.example .env.local
 ```
 
 2. **Edita `.env.local`** y agrega tu API Key:

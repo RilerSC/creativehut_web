@@ -1,5 +1,7 @@
 # ✅ MITIGACIONES DE SEGURIDAD IMPLEMENTADAS
 
+> Documento histórico. El esquema vigente de variables es `.env.example` (`SMTP_*`, no `EMAIL_*` ni `GMAIL_*`).
+
 **Fecha:** 2025-01-28  
 **Estado:** ✅ COMPLETADO Y PROBADO
 

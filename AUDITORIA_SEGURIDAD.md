@@ -1,6 +1,10 @@
 # 🔒 AUDITORÍA DE SEGURIDAD - OWASP Top 10
 ## Creative Hut - API de Envío de Emails
 
+> Documento histórico (2025-01-28). No es el esquema vigente.
+> Las variables actuales están solo en `.env.example` (`SMTP_*`).
+> El módulo de correo ya no está en `src/app/api/send-email/route.ts`; está en `src/server/email/contact-mailer.ts` y no se publica con el export estático.
+
 **Fecha:** 2025-01-28  
 **Auditor:** Análisis de Código Estático  
 **Alcance:** `/src/app/api/send-email/route.ts` y `/src/components/ContactForm.tsx`
